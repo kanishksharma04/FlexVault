@@ -1,7 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : '/api');
+import { API_URL } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -33,6 +33,8 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get(`${API_URL}/auth/me`);
       setUser(response.data);
     } catch (error) {
+      // Log the error for debugging and clear auth state
+      console.error('fetchUser error:', error);
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
     } finally {

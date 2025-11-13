@@ -6,10 +6,12 @@
   ],
   "routes": [
     { "src": "/api", "dest": "/backend/api/index.js" },
-    { "src": "/", "dest": "/backend/api/index.js" },
     { "src": "/api/auth/signup", "dest": "/backend/api/auth/signup.js" },
     { "src": "/api/auth/login", "dest": "/backend/api/auth/login.js" },
     { "src": "/api/auth/me", "dest": "/backend/api/auth/me.js" },
+    { "src": "/signup", "dest": "/backend/api/auth/signup.js" },
+    { "src": "/login", "dest": "/backend/api/auth/login.js" },
+    { "src": "/me", "dest": "/backend/api/auth/me.js" },
     { "src": "/(.*)", "dest": "/frontend/$1" }
   ]
 }
