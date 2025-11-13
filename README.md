@@ -1,88 +1,47 @@
-# CareerLink - Job Portal
+Frontend Url=> job-portal-five-henna.vercel.app
+Backend Url=> https://jobportal-fkdm.onrender.com
 
-A full-stack job portal application with authentication functionality.
 
-## Tech Stack
+Project Title: CareerLink – Job Portal Site
 
-**Frontend:**
-- React + Vite
-- React Router
-- Tailwind CSS
-- Axios
 
-**Backend:**
-- Node.js + Express
-- Prisma ORM
-- MongoDB
-- JWT Authentication
-- bcryptjs
+Problem Statement:
+Finding and applying for jobs is often fragmented across multiple platforms, making it difficult for job
+seekers and recruiters to connect efficiently. CareerLink aims to simplify this process by providing a
+unified platform where employers can post job openings, and job seekers can browse, apply, and
+track their applications easily.
+System Architecture:
+Frontend → Backend (API) → Database
+Frontend: React.js with React Router for page navigation
+Backend: Node.js + Express
+Database: MongoDB (non-relational) / PostgreSQL (relational)
+Authentication: JWT-based login/signup
+Hosting:
+Frontend → Netlify/Vercel
+Backend → Render/Railway
+Database → MongoDB Atlas / ElephantSQL / Aiven
+Key Features:
 
-## Setup Instructions
+Category | Features
+Authentication & Authorization — User registration, login, logout, role-based access (admin/user)
+CRUD Operations — Create, read, update, delete job listings and user data
+Frontend Routing — Pages: Home, Login, Dashboard, Job Details, Profile, Post Job
+Job Management — Recruiters can post, edit, and delete jobs
+Application System — Job seekers can apply for jobs and track their status
+Data Operations — Searching, sorting, filtering, and pagination of job listings for efficient data handling
+Hosting — Deployed on Vercel (frontend) and Render (backend) with MongoDB Atlas
 
-### Backend Setup
 
-1. Navigate to backend directory:
-```bash
-cd backend
-```
 
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Update `.env` file with your MongoDB connection string:
-```
-DATABASE_URL="mongodb+srv://deepanshu26:deepanshu26@jobportal.dtmtqnc.mongodb.net/JobPortal?appName=JobPortal"
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
-PORT=5001
-# Set to your frontend origin(s). Use a comma for multiple, or '*' to allow all (dev only).
-CLIENT_URL="http://localhost:5173"
-```
-
-4. Generate Prisma client:
-```bash
-node generate.js
-```
-
-5. Start the server:
-```bash
-PORT=5001 npm run dev
-```
-
-### Frontend Setup
-
-1. Navigate to frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create a `.env` file (next to `vite.config.js`) with your API base URL:
-```
-VITE_API_URL="http://localhost:5001/api"
-```
-
-4. Start the development server:
-```bash
-npm run dev
-```
-
-## API Endpoints
-
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user (protected)
-
-## Features
-
-- User registration and login
-- JWT-based authentication
-- Role-based access (user/admin)
-- Protected routes
-- Responsive design with Tailwind CSS
-- Form validation and error handling
+Tech Stack:
+Frontend: React.js, React Router, Axios, TailwindCSS/Bootstrap
+Backend: Node.js, Express.js
+Database: MongoDB / PostgreSQL
+Authentication: JWT / OAuth
+Hosting: Vercel, Render, Netlify, Railway
+API Overview:
+/api/auth/signup – Register new user (Public)
+/api/auth/login – Authenticate user (Public)
+/api/jobs – Get all job listings (Authenticated)
+/api/jobs/:id – Update job listing (Authenticated)
+/api/jobs/:id – Delete job listing (Admin only)
