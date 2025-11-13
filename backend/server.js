@@ -147,6 +147,13 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'CareerLink API', env: process.env.NODE_ENV || 'development' });
+});
+
+app.get('/api', (req, res) => {
+  res.json({ status: 'ok' });
+});
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
