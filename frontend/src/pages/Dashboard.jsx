@@ -15,12 +15,10 @@ const Dashboard = () => {
     <div className="dashboard">
       <nav className="navbar">
         <div className="navbar-content">
-          <h1 className="navbar-brand">CareerLink</h1>
+          <h1 className="navbar-brand">FlexVault</h1>
           <div className="navbar-user">
             <span>Welcome, {user?.name}</span>
-            <span className="user-badge">
-              {user?.role === 'admin' ? 'Recruiter' : 'Job Seeker'}
-            </span>
+            
             <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>
@@ -31,13 +29,8 @@ const Dashboard = () => {
       <main className="main-content">
         <div className="dashboard-placeholder">
           <div className="dashboard-welcome">
-            <h2>Welcome to CareerLink Dashboard</h2>
-            <p>
-              {user?.role === 'admin' 
-                ? 'You can post and manage job listings here.' 
-                : 'You can browse and apply for jobs here.'
-              }
-            </p>
+            <h2>Welcome to FlexVault Dashboard</h2>
+            
           </div>
         </div>
       </main>

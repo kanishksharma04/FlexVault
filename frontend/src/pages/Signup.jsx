@@ -72,17 +72,7 @@ const Signup = () => {
               onChange={handleChange}
             />
           </div>
-          <div className="form-group">
-            <select
-              name="role"
-              className="form-input"
-              value={formData.role}
-              onChange={handleChange}
-            >
-              <option value="user">Job Seeker</option>
-              <option value="admin">Recruiter</option>
-            </select>
-          </div>
+          
 
           {error && (
             <div className="error-message">{error}</div>
