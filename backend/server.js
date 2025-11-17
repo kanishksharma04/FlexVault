@@ -6,27 +6,39 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const crypto = require('crypto');
 
-// Secrets & config
+// ---------------------- Crash handlers (helps debugging startup failures) ----------------------
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
+  // exit so process manager (nodemon/render) can restart appropriately
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION at', promise, 'reason:', reason && reason.stack ? reason.stack : reason);
+  process.exit(1);
+});
+
+// ----------------------------- Config & Secrets --------------------------------
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
-const PORT = process.env.PORT || 3001;
+const REQUESTED_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001; // keep using env port if provided
 
 // Prisma client with verbose logging
 const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] });
 
-// DB connection check on startup
+// DB connection check on startup (non-blocking startup errors are logged)
 (async () => {
   try {
     console.log('NODE_ENV:', process.env.NODE_ENV || 'not set');
-    const maskedDb = process.env.DATABASE_URL 
-      ? `${process.env.DATABASE_URL.slice(0, 40)}...` 
+    const maskedDb = process.env.DATABASE_URL
+      ? `${process.env.DATABASE_URL.slice(0, 40)}...`
       : '(not set)';
     console.log('DATABASE_URL:', maskedDb);
 
     await prisma.$connect();
     console.log('Prisma connected successfully');
   } catch (err) {
-    console.error('Prisma connection failed:', err);
+    console.error('Prisma connection failed (startup):', err && err.stack ? err.stack : err);
+    // do not exit here — server can still be useful for debugging endpoints (optional)
   }
 })();
 
@@ -51,8 +63,8 @@ const defaultDevOrigins = [
   'http://127.0.0.1:5173',
 ];
 
-const corsOrigin = 
-  isDev || !clientUrlEnv || clientUrlEnv === '*' 
+const corsOrigin =
+  isDev || !clientUrlEnv || clientUrlEnv === '*'
     ? (origin, callback) => callback(null, true)
     : [...parseOrigins(clientUrlEnv), ...defaultDevOrigins];
 
@@ -147,7 +159,7 @@ app.post('/api/auth/signup', async (req, res) => {
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    console.error('Signup error:', err);
+    console.error('Signup error:', err && err.stack ? err.stack : err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -173,7 +185,7 @@ app.post('/signup', async (req, res) => {
 
     res.status(201).json({ success: true, message: 'User created' });
   } catch (err) {
-    console.error('Error in /signup:', err);
+    console.error('Error in /signup:', err && err.stack ? err.stack : err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -204,7 +216,7 @@ app.post('/api/auth/login', async (req, res) => {
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('Login error:', err && err.stack ? err.stack : err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -218,7 +230,7 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     });
     res.json(user);
   } catch (err) {
-    console.error('Error in /api/auth/me:', err);
+    console.error('Error in /api/auth/me:', err && err.stack ? err.stack : err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -230,21 +242,62 @@ app.get('/', (req, res) => {
 
 /* --------------------------- GLOBAL ERROR --------------------------- */
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
+  console.error('Unhandled error:', err && err.stack ? err.stack : err);
   res.status(500).json({ error: 'Unhandled server error' });
 });
 
 /* ------------------------- GRACEFUL SHUTDOWN ------------------------- */
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
-process.on('SIGTERM', async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
+async function gracefulShutdown(code = 0) {
+  try {
+    console.log('Shutting down gracefully...');
+    await prisma.$disconnect();
+  } catch (e) {
+    console.error('Error while disconnecting Prisma:', e && e.stack ? e.stack : e);
+  } finally {
+    process.exit(code);
+  }
+}
+process.on('SIGINT', () => gracefulShutdown(0));
+process.on('SIGTERM', () => gracefulShutdown(0));
 
 /* ------------------------------ START ------------------------------- */
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+/**
+ * Attempts to start the server on a port; if EADDRINUSE occurs it will
+ * try the next port up to `maxAttempts`.
+ */
+function startServer(initialPort = REQUESTED_PORT, maxAttempts = 5) {
+  let attempt = 0;
+  let portToTry = initialPort;
+
+  const tryListen = () => {
+    attempt += 1;
+    const server = app.listen(portToTry, '0.0.0.0', () => {
+      console.log(`Server running on port ${portToTry}`);
+    });
+
+    server.on('error', (err) => {
+      if (err && err.code === 'EADDRINUSE') {
+        console.warn(`Port ${portToTry} is in use (EADDRINUSE). Attempt ${attempt} of ${maxAttempts}.`);
+        server.close?.();
+        if (attempt < maxAttempts) {
+          portToTry += 1; // try next port
+          console.log(`Trying next port: ${portToTry}`);
+          // small delay before retrying
+          setTimeout(tryListen, 250);
+        } else {
+          console.error(`Unable to bind to a free port after ${maxAttempts} attempts. Please free port ${initialPort} or set PORT env to another port and try again.`);
+          // exit with non-zero so process managers know it failed
+          gracefulShutdown(1);
+        }
+      } else {
+        console.error('Server error on listen:', err && err.stack ? err.stack : err);
+        gracefulShutdown(1);
+      }
+    });
+  };
+
+  tryListen();
+}
+
+// Start the server
+startServer();
