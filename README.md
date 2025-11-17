@@ -45,4 +45,3 @@ API Overview:
 /api/jobs – Get all job listings (Authenticated)
 /api/jobs/:id – Update job listing (Authenticated)
 /api/jobs/:id – Delete job listing (Admin only)
-# FlexVault
