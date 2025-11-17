@@ -6,26 +6,44 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const crypto = require('crypto');
 
-// ---------------------- Crash handlers (helps debugging startup failures) ----------------------
+/* ---------------------- Crash handlers (helps debugging startup failures) ---------------------- */
+/* Use gracefulShutdown so Prisma disconnects before exiting */
+async function gracefulShutdown(code = 0, reason = '') {
+  try {
+    console.log('Graceful shutdown start', reason ? `reason=${reason}` : '');
+    if (prisma) {
+      await prisma.$disconnect();
+      console.log('Prisma disconnected');
+    }
+  } catch (e) {
+    console.error('Error during gracefulShutdown:', e && e.stack ? e.stack : e);
+  } finally {
+    console.log('Exiting with code', code);
+    process.exit(code);
+  }
+}
+
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
-  // exit so process manager (nodemon/render) can restart appropriately
-  process.exit(1);
+  // attempt a graceful shutdown then exit
+  gracefulShutdown(1, 'uncaughtException');
 });
+
 process.on('unhandledRejection', (reason, promise) => {
   console.error('UNHANDLED REJECTION at', promise, 'reason:', reason && reason.stack ? reason.stack : reason);
-  process.exit(1);
+  // attempt a graceful shutdown then exit
+  gracefulShutdown(1, 'unhandledRejection');
 });
 
-// ----------------------------- Config & Secrets --------------------------------
+/* ----------------------------- Config & Secrets -------------------------------- */
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
-const REQUESTED_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001; // keep using env port if provided
+const REQUESTED_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
-// Prisma client with verbose logging
+/* ----------------------------- Prisma client ---------------------------------- */
 const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] });
 
-// DB connection check on startup (non-blocking startup errors are logged)
+/* DB connection check on startup (non-blocking) */
 (async () => {
   try {
     console.log('NODE_ENV:', process.env.NODE_ENV || 'not set');
@@ -34,11 +52,12 @@ const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] });
       : '(not set)';
     console.log('DATABASE_URL:', maskedDb);
 
+    // Attempt to connect, but don't exit if it fails here — we log the error
     await prisma.$connect();
     console.log('Prisma connected successfully');
   } catch (err) {
     console.error('Prisma connection failed (startup):', err && err.stack ? err.stack : err);
-    // do not exit here — server can still be useful for debugging endpoints (optional)
+    // Do NOT exit; keep server up so we can debug endpoints or accept connections while DB recovers.
   }
 })();
 
@@ -50,18 +69,14 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 /* ------------------------------ CORS -------------------------------- */
 const isDev = process.env.NODE_ENV !== 'production';
-
-const parseOrigins = value =>
+const parseOrigins = (value) =>
   value
     .split(',')
-    .map(origin => origin.trim())
+    .map((origin) => origin.trim())
     .filter(Boolean);
 
-const clientUrlEnv = process.env.CLIENT_URL;
-const defaultDevOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-];
+const clientUrlEnv = process.env.CLIENT_URL || '';
+const defaultDevOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
 const corsOrigin =
   isDev || !clientUrlEnv || clientUrlEnv === '*'
@@ -91,13 +106,8 @@ app.options(
 
 /* --------------------------- DEBUG LOGGER --------------------------- */
 app.use((req, res, next) => {
-  const bodyKeys = req.body && Object.keys(req.body).length
-    ? Object.keys(req.body).join(',')
-    : 'none';
-
-  console.log(
-    `[REQ] ${req.method} ${req.originalUrl} - origin: ${req.headers.origin || 'no-origin'} - bodyKeys: ${bodyKeys}`
-  );
+  const bodyKeys = req.body && Object.keys(req.body).length ? Object.keys(req.body).join(',') : 'none';
+  console.log(`[REQ] ${req.method} ${req.originalUrl} - origin: ${req.headers.origin || 'no-origin'} - bodyKeys: ${bodyKeys}`);
   next();
 });
 
@@ -127,7 +137,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-/* ------------------------------- ROUTES ------------------------------ */
+/* ---------------------------------- ROUTES ---------------------------------- */
 
 // SIGNUP
 app.post('/api/auth/signup', async (req, res) => {
@@ -147,17 +157,9 @@ app.post('/api/auth/signup', async (req, res) => {
       data: { name, email, password: hashed, role },
     });
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
 
-    res.status(201).json({
-      message: 'User created successfully',
-      token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    });
+    res.status(201).json({ message: 'User created successfully', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     console.error('Signup error:', err && err.stack ? err.stack : err);
     res.status(500).json({ error: 'Server error' });
@@ -174,14 +176,11 @@ app.post('/signup', async (req, res) => {
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser)
-      return res.status(400).json({ success: false, message: 'User already exists' });
+    if (existingUser) return res.status(400).json({ success: false, message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    await prisma.user.create({
-      data: { name, email, password: hashedPassword, role },
-    });
+    await prisma.user.create({ data: { name, email, password: hashedPassword, role } });
 
     res.status(201).json({ success: true, message: 'User created' });
   } catch (err) {
@@ -194,9 +193,7 @@ app.post('/signup', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password)
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
@@ -204,17 +201,9 @@ app.post('/api/auth/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
 
-    res.json({
-      message: 'Login successful',
-      token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    });
+    res.json({ message: 'Login successful', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     console.error('Login error:', err && err.stack ? err.stack : err);
     res.status(500).json({ error: 'Server error' });
@@ -224,10 +213,7 @@ app.post('/api/auth/login', async (req, res) => {
 // GET LOGGED-IN USER
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      select: { id: true, name: true, email: true, role: true },
-    });
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId }, select: { id: true, name: true, email: true, role: true } });
     res.json(user);
   } catch (err) {
     console.error('Error in /api/auth/me:', err && err.stack ? err.stack : err);
@@ -246,58 +232,54 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Unhandled server error' });
 });
 
-/* ------------------------- GRACEFUL SHUTDOWN ------------------------- */
-async function gracefulShutdown(code = 0) {
-  try {
-    console.log('Shutting down gracefully...');
-    await prisma.$disconnect();
-  } catch (e) {
-    console.error('Error while disconnecting Prisma:', e && e.stack ? e.stack : e);
-  } finally {
-    process.exit(code);
-  }
-}
-process.on('SIGINT', () => gracefulShutdown(0));
-process.on('SIGTERM', () => gracefulShutdown(0));
-
 /* ------------------------------ START ------------------------------- */
 /**
  * Attempts to start the server on a port; if EADDRINUSE occurs it will
- * try the next port up to `maxAttempts`.
+ * try the next port up to `maxAttempts`. If using Render, Render will
+ * provide the correct PORT in process.env.PORT and that will be used.
  */
 function startServer(initialPort = REQUESTED_PORT, maxAttempts = 5) {
   let attempt = 0;
   let portToTry = initialPort;
+  let listening = false;
 
   const tryListen = () => {
     attempt += 1;
+    console.log(`Attempt ${attempt} to listen on port ${portToTry}...`);
     const server = app.listen(portToTry, '0.0.0.0', () => {
+      listening = true;
       console.log(`Server running on port ${portToTry}`);
     });
 
     server.on('error', (err) => {
+      // If server already listening, skip
+      if (listening) return;
+
       if (err && err.code === 'EADDRINUSE') {
-        console.warn(`Port ${portToTry} is in use (EADDRINUSE). Attempt ${attempt} of ${maxAttempts}.`);
+        console.warn(`Port ${portToTry} is in use (EADDRINUSE). Attempt ${attempt}/${maxAttempts}.`);
         server.close?.();
         if (attempt < maxAttempts) {
           portToTry += 1; // try next port
           console.log(`Trying next port: ${portToTry}`);
-          // small delay before retrying
           setTimeout(tryListen, 250);
         } else {
           console.error(`Unable to bind to a free port after ${maxAttempts} attempts. Please free port ${initialPort} or set PORT env to another port and try again.`);
-          // exit with non-zero so process managers know it failed
-          gracefulShutdown(1);
+          gracefulShutdown(1, 'port_bind_failed');
         }
       } else {
-        console.error('Server error on listen:', err && err.stack ? err.stack : err);
-        gracefulShutdown(1);
+        console.error('Server listen error:', err && err.stack ? err.stack : err);
+        gracefulShutdown(1, 'listen_error');
       }
+    });
+
+    // safety: if process exits, close server
+    process.on('SIGINT', () => {
+      server.close(() => console.log('Server closed due to SIGINT'));
     });
   };
 
   tryListen();
 }
 
-// Start the server
+// Start server
 startServer();
