@@ -61,6 +61,7 @@
   --animate-shimmer: shimmer 2.2s linear infinite;
   --animate-pulse-glow: pulse-glow 1.8s ease-in-out infinite;
   --animate-flicker: flicker 3s ease-in-out infinite;
+  --animate-hazard-scroll: hazard-scroll 1.5s linear infinite;
 }
 
 :root {
@@ -173,6 +174,7 @@
       var(--vault) 10px,
       var(--vault) 20px
     );
+    animation: var(--animate-hazard-scroll);
   }
 
   /* Halftone dot texture accent */
@@ -221,6 +223,15 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes hazard-scroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 28.284px 0;
   }
 }
 
