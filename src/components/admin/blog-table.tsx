@@ -92,10 +92,10 @@ export function BlogTable({ posts }: { posts: AdminBlogRow[] }) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setEditing(p)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Edit ${p.title}`} onClick={() => setEditing(p)}>
                     <Pencil className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setConfirmDelete(p)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Delete ${p.title}`} onClick={() => setConfirmDelete(p)}>
                     <Trash2 className="size-3.5" />
                   </Button>
                 </div>

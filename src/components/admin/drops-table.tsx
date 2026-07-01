@@ -101,10 +101,10 @@ export function DropsTable({ drops }: { drops: AdminDropRow[] }) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setManageDrop(d)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Manage ${d.title}`} onClick={() => setManageDrop(d)}>
                     <Settings className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setConfirmDelete(d)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Delete ${d.title}`} onClick={() => setConfirmDelete(d)}>
                     <Trash2 className="size-3.5" />
                   </Button>
                 </div>

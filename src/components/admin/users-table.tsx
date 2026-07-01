@@ -58,10 +58,10 @@ export function UsersTable({ users }: { users: AdminUserRow[] }) {
               <TableCell>{u.isProMember ? <Badge variant="acid">Pro</Badge> : "—"}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setEditing(u)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Edit ${u.name}`} onClick={() => setEditing(u)}>
                     <Pencil className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setConfirmArchive(u)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Archive ${u.name}`} onClick={() => setConfirmArchive(u)}>
                     <Archive className="size-3.5" />
                   </Button>
                 </div>

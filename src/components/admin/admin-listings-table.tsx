@@ -65,10 +65,10 @@ export function AdminListingsTable({ listings }: { listings: AdminListingRow[] }
               <TableCell><Badge variant={STATUS_VARIANT[l.status]}>{l.status.replace(/_/g, " ")}</Badge></TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setEditing(l)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Edit ${l.product.name}`} onClick={() => setEditing(l)}>
                     <Pencil className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setConfirmArchive(l)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Archive ${l.product.name}`} onClick={() => setConfirmArchive(l)}>
                     <Archive className="size-3.5" />
                   </Button>
                 </div>

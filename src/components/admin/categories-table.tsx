@@ -103,10 +103,10 @@ export function CategoriesTable({ categories }: { categories: AdminCategoryRow[]
               <TableCell className="font-mono">{c._count.products}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setEditing(c)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}>
                     <Pencil className="size-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="size-7" onClick={() => setConfirmDelete(c)}>
+                  <Button variant="ghost" size="icon" className="size-7" aria-label={`Delete ${c.name}`} onClick={() => setConfirmDelete(c)}>
                     <Trash2 className="size-3.5" />
                   </Button>
                 </div>
