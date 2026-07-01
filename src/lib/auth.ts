@@ -5,13 +5,13 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
+import { authConfig } from "@/lib/auth.config";
 
 const googleConfigured = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(db),
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
   providers: [
     ...(googleConfigured
       ? [
@@ -49,24 +49,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.id = user.id as string;
-        token.role = user.role as string;
-        token.sellerTier = user.sellerTier as string;
-        token.isProMember = user.isProMember as boolean;
-      }
-      return token;
-    },
-    session: async ({ session, token }) => {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as "BUYER" | "SELLER" | "ADMIN" | "AUTHENTICATOR";
-        session.user.sellerTier = token.sellerTier as string;
-        session.user.isProMember = token.isProMember as boolean;
-      }
-      return session;
-    },
-  },
 });
