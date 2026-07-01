@@ -1,0 +1,410 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+  AUTHENTICATOR
+}
+
+enum SellerTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum ListingType {
+  FIXED
+  AUCTION
+  PREORDER
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_AUTH
+  ACTIVE
+  SOLD
+  REJECTED
+  ARCHIVED
+}
+
+enum AuthDecision {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  PLACED
+  AUTHENTICATED
+  SHIPPED
+  DELIVERED
+  DISPUTED
+  RETURNED
+  CANCELLED
+}
+
+enum BidStatus {
+  ACTIVE
+  OUTBID
+  WON
+  LOST
+  RETRACTED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_BUYER
+  RESOLVED_SELLER
+}
+
+enum CategoryPhase {
+  PHASE_1
+  PHASE_2
+  PHASE_3
+}
+
+enum Condition {
+  NEW
+  LIKE_NEW
+  USED_EXCELLENT
+  USED_GOOD
+  USED_FAIR
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Identity
+// ─────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String?
+  image        String?
+  role         Role       @default(BUYER)
+  sellerTier   SellerTier @default(BRONZE)
+  isProMember  Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  archivedAt   DateTime?
+
+  accounts Account[]
+  sessions Session[]
+
+  listings           Listing[]              @relation("SellerListings")
+  orders             Order[]                @relation("BuyerOrders")
+  bids               Bid[]
+  reviews            Review[]               @relation("ReviewRaisedBy")
+  authenticatedItems AuthenticationRecord[] @relation("AuthenticatorRecords")
+  watchlist          WatchlistItem[]
+  blogPosts          BlogPost[]
+  addresses          Address[]
+
+  @@index([role])
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  fullName  String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  phone     String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Catalog
+// ─────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id       String        @id @default(cuid())
+  name     String
+  slug     String        @unique
+  phase    CategoryPhase @default(PHASE_1)
+  parentId String?
+  icon     String?
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+}
+
+model Product {
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  brand          String
+  categoryId     String
+  subcategory    String?
+  images         String[]
+  description    String
+  releaseDate    DateTime?
+  baseTrendScore Float     @default(50)
+  sku            String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  archivedAt     DateTime?
+
+  category      Category        @relation(fields: [categoryId], references: [id])
+  listings      Listing[]
+  trendHistory  TrendScore[]
+  watchlistedBy WatchlistItem[]
+  dropFeatures  DropProduct[]
+
+  @@index([categoryId])
+  @@index([brand])
+  @@index([slug])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Marketplace
+// ─────────────────────────────────────────────────────────────────────────
+
+model Listing {
+  id              String        @id @default(cuid())
+  sellerId        String
+  productId       String
+  price           Float
+  condition       Condition     @default(NEW)
+  listingType     ListingType   @default(FIXED)
+  status          ListingStatus @default(PENDING_AUTH)
+  size            String?
+  variant         String?
+  quantity        Int           @default(1)
+  auctionEndsAt   DateTime?
+  preorderShipsAt DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  archivedAt      DateTime?
+
+  seller               User                  @relation("SellerListings", fields: [sellerId], references: [id])
+  product              Product               @relation(fields: [productId], references: [id])
+  authenticationRecord AuthenticationRecord?
+  orders               Order[]
+  bids                 Bid[]
+  watchlistedBy        WatchlistItem[]
+
+  @@index([sellerId])
+  @@index([productId])
+  @@index([status])
+  @@index([listingType])
+}
+
+model AuthenticationRecord {
+  id               String       @id @default(cuid())
+  listingId        String       @unique
+  authenticatorId  String?
+  status           AuthDecision @default(PENDING)
+  inspectionPhotos String[]
+  notes            String?
+  certificateHash  String?
+  qrCodeUrl        String?
+  reviewedAt       DateTime?
+  createdAt        DateTime     @default(now())
+
+  listing       Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authenticator User?   @relation("AuthenticatorRecords", fields: [authenticatorId], references: [id])
+
+  @@index([status])
+}
+
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String?
+  listingId String?
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Bid {
+  id        String    @id @default(cuid())
+  listingId String
+  bidderId  String
+  amount    Float
+  status    BidStatus @default(ACTIVE)
+  createdAt DateTime  @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  bidder  User    @relation(fields: [bidderId], references: [id])
+
+  @@index([listingId])
+  @@index([bidderId])
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  buyerId        String
+  listingId      String
+  price          Float
+  commissionRate Float       @default(0.1)
+  insuranceOpted Boolean     @default(false)
+  insuranceFee   Float       @default(0)
+  addressId      String?
+  status         OrderStatus @default(PLACED)
+  trackingEvents Json[]      @default([])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  archivedAt     DateTime?
+
+  buyer   User     @relation("BuyerOrders", fields: [buyerId], references: [id])
+  listing Listing  @relation(fields: [listingId], references: [id])
+  address Address? @relation(fields: [addressId], references: [id])
+  reviews Review[]
+
+  @@index([buyerId])
+  @@index([listingId])
+  @@index([status])
+}
+
+model Review {
+  id           String        @id @default(cuid())
+  orderId      String
+  raisedById   String
+  reason       String
+  resolution   String?
+  refundIssued Boolean       @default(false)
+  status       DisputeStatus @default(OPEN)
+  createdAt    DateTime      @default(now())
+  resolvedAt   DateTime?
+
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  raisedBy User  @relation("ReviewRaisedBy", fields: [raisedById], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Trend engine
+// ─────────────────────────────────────────────────────────────────────────
+
+model TrendScore {
+  id               String   @id @default(cuid())
+  productId        String
+  score            Float
+  mentionVelocity  Float
+  sentimentScore   Float
+  engagementGrowth Float
+  reasonSummary    String?
+  calculatedAt     DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, calculatedAt])
+}
+
+model TrendWeightConfig {
+  id                    String   @id @default(cuid())
+  mentionVelocityWeight Float    @default(0.4)
+  sentimentWeight       Float    @default(0.35)
+  engagementWeight      Float    @default(0.25)
+  updatedAt             DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Content & drops
+// ─────────────────────────────────────────────────────────────────────────
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String
+  content     String
+  coverImage  String
+  authorId    String
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([slug])
+}
+
+model Drop {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String
+  coverImage      String
+  dropDate        DateTime
+  countdownTarget DateTime
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  featuredProducts DropProduct[]
+
+  @@index([slug])
+}
+
+model DropProduct {
+  id        String @id @default(cuid())
+  dropId    String
+  productId String
+
+  drop    Drop    @relation(fields: [dropId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([dropId, productId])
+}
