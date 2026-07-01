@@ -24,10 +24,26 @@ const fontData = Space_Mono({
   subsets: ["latin"],
 });
 
+const TITLE = "Flex Vault — Drip. Verified. Delivered.";
+const DESCRIPTION =
+  "India's authenticated marketplace for hype culture — sneakers, streetwear, diecast, watches, and accessories. Multi-layer verified, delivered PAN-India in 2-3 days.";
+
 export const metadata: Metadata = {
-  title: "Flex Vault — Drip. Verified. Delivered.",
-  description:
-    "India's authenticated marketplace for hype culture — sneakers, streetwear, diecast, watches, and accessories. Multi-layer verified, delivered PAN-India in 2-3 days.",
+  metadataBase: new URL("https://flex-vault.vercel.app"),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    siteName: "Flex Vault",
+    type: "website",
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
