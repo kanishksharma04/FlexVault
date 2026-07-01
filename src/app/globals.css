@@ -56,7 +56,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
 
-  --animate-marquee: marquee 28s linear infinite;
+  --animate-marquee: marquee 56s linear infinite;
   --animate-marquee-fast: marquee 14s linear infinite;
   --animate-shimmer: shimmer 2.2s linear infinite;
   --animate-pulse-glow: pulse-glow 1.8s ease-in-out infinite;
