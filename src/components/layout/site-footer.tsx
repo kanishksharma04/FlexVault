@@ -57,9 +57,9 @@ export function SiteFooter() {
                   <li key={l.href}>
                     <Link
                       href={l.href}
-                      className="text-sm text-foreground/80 transition hover:text-acid"
+                      className="group inline-flex items-center gap-1 text-sm text-foreground/80 transition hover:text-acid"
                     >
-                      {l.label}
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">{l.label}</span>
                     </Link>
                   </li>
                 ))}
