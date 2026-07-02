@@ -1,6 +1,7 @@
 import { PrismaClient, ListingType, ListingStatus, AuthDecision, Condition, OrderStatus, BidStatus, DisputeStatus, CategoryPhase, Role, SellerTier } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { mockProductImages } from "../src/lib/mock-image";
+import { PRODUCT_IMAGE_OVERRIDES } from "../src/lib/product-images";
 import { calcTrendScore, trendReasonSummary } from "../src/lib/business/trend";
 import { generateCertificateHash } from "../src/lib/business/certificate";
 import { SELLER_TIER_COMMISSION, INSURANCE_THRESHOLD_INR } from "../src/lib/business/constants";
@@ -208,7 +209,7 @@ async function main() {
         brand: item.brand,
         categoryId: item.categoryId,
         subcategory: item.subcategory,
-        images: mockProductImages(fullName, item.name, 4),
+        images: PRODUCT_IMAGE_OVERRIDES[fullName] ?? mockProductImages(fullName, item.name, 4),
         description: `Authenticated ${fullName}, verified by Flex Vault's multi-layer inspection process. Every unit is cross-checked against ${item.brand}'s construction, materials, and packaging references before it clears the vault.`,
         releaseDate: new Date(Date.now() - releaseDaysAgo * 86_400_000),
         sku: `FV-${slugify(item.brand)}-${randInt(10000, 99999)}`.toUpperCase(),

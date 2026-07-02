@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
@@ -8,6 +8,7 @@ import { Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { trendTemperature } from "@/lib/business/trend";
+import { mockProductImage } from "@/lib/mock-image";
 
 export type ProductCardData = {
   slug: string;
@@ -42,6 +43,9 @@ export function ProductCard({ product, className }: { product: ProductCardData; 
 
   const temp = trendTemperature(product.trendScore);
   const secondaryImage = product.images[1] ?? product.images[0];
+  const fallback = mockProductImage(product.name, product.name);
+  const [primarySrc, setPrimarySrc] = useState(product.images[0]);
+  const [secondarySrc, setSecondarySrc] = useState(secondaryImage);
 
   return (
     <motion.div
@@ -54,16 +58,20 @@ export function ProductCard({ product, className }: { product: ProductCardData; 
       <Link href={`/product/${product.slug}`} className="flex flex-1 flex-col">
         <div className="relative aspect-square w-full overflow-hidden bg-vault-3">
           <Image
-            src={product.images[0]}
+            src={primarySrc}
             alt={product.name}
             fill
+            unoptimized={primarySrc.startsWith("data:")}
+            onError={() => setPrimarySrc(fallback)}
             className="object-cover transition-opacity duration-300 group-hover:opacity-0"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
           <Image
-            src={secondaryImage}
+            src={secondarySrc}
             alt={`${product.name} alternate view`}
             fill
+            unoptimized={secondarySrc.startsWith("data:")}
+            onError={() => setSecondarySrc(fallback)}
             className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
