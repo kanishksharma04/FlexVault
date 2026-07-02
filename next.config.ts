@@ -34,6 +34,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "feature.com" },
       { protocol: "https", hostname: "www.stadiumgoods.com" },
       { protocol: "https", hostname: "www.fashionphile.com" },
+      { protocol: "https", hostname: "horizondiecast.com" },
+      { protocol: "https", hostname: "www.modelcarshouston.com" },
     ],
   },
 };

@@ -25,6 +25,14 @@ export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
     "https://images.stockx.com/images/Denim-Tears-The-Cotton-Wreath-Sweatshirt-Black-ProductX.jpg",
     "https://images.stockx.com/images/Denim-Tears-The-Cotton-Wreath-Sweatshirt-Black-ProductX-2.jpg",
   ],
+  "Tarmac Works Nissan Skyline GT-R R34 Z-Tune": [
+    "https://horizondiecast.com/cdn/shop/products/T64S-014-GT.png",
+    "https://www.modelcarshouston.com/cdn/shop/products/T64S-014-GT_a.jpg",
+  ],
+  "Mini GT Toyota GR Supra LB-Works": [
+    "https://krazycaterpillar.com/cdn/shop/products/1_1428f574-2715-4d06-8b4c-0113504d9829_1800x1800.jpg",
+    "https://krazycaterpillar.com/cdn/shop/products/2_9edc2742-c643-44b8-9c46-a09fd36ae31c_1800x1800.jpg",
+  ],
   "Nike Dunk Low Panda": [
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img01.jpg",
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img02.jpg",

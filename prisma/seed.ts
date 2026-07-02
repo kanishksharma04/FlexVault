@@ -162,6 +162,8 @@ async function main() {
     { name: "Honda NSX Type R", brand: "Tomica Limited Vintage", categoryId: diecast.id, priceRange: [2000, 4000] },
     { name: "Team Transport Camaro Set", brand: "Hot Wheels", categoryId: diecast.id, priceRange: [3200, 6000] },
     { name: "Lamborghini Countach LP500S", brand: "Kyosho", categoryId: diecast.id, priceRange: [8500, 15000] },
+    { name: "Nissan Skyline GT-R R34 Z-Tune", brand: "Tarmac Works", categoryId: diecast.id, priceRange: [4000, 8000] },
+    { name: "Toyota GR Supra LB-Works", brand: "Mini GT", categoryId: diecast.id, priceRange: [2800, 5500] },
     // Streetwear
     { name: "Box Logo Hoodie Black", brand: "Supreme", categoryId: streetwear.id, subcategory: "Hoodies", priceRange: [28000, 55000] },
     { name: "Box Logo Tee White", brand: "Supreme", categoryId: streetwear.id, priceRange: [9000, 16000] },
