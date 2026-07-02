@@ -1,6 +1,10 @@
 // Curated real product photography, sourced and hotlink-verified from retailer/marketplace CDNs.
 // Keyed by the exact `Product.name` value used in prisma/seed.ts (`${brand} ${name}`).
 export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
+  "Palace Tri-Ferg Hoodie": [
+    "https://images.stockx.com/images/Palace-Tri-Ferg-Hood-Orange-White.jpg",
+    "https://images.stockx.com/images/Palace-Tri-Ferg-Hood-Orange-White-2.jpg",
+  ],
   "Nike Dunk Low Panda": [
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img01.jpg",
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img02.jpg",
