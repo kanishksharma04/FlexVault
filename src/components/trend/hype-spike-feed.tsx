@@ -25,10 +25,10 @@ export function HypeSpikeFeed({ entries }: { entries: HypeTickerEntry[] }) {
           >
             <Link
               href={`/product/${e.productSlug}`}
-              className="flex items-center gap-3 border border-border bg-card p-3 transition hover:border-acid"
+              className="group flex items-center gap-3 border border-border bg-card p-3 transition duration-200 hover:translate-x-1 hover:border-acid"
             >
               <div
-                className={`flex size-9 shrink-0 items-center justify-center rounded-full ${rising ? "bg-hype/15 text-hype" : "bg-vault-3 text-muted-foreground"}`}
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110 ${rising ? "bg-hype/15 text-hype" : "bg-vault-3 text-muted-foreground"}`}
               >
                 {rising ? <Flame className="size-4" /> : <TrendingDown className="size-4" />}
               </div>
