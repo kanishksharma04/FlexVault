@@ -7,10 +7,10 @@ export function TrendGaugeCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="card-hype flex flex-col items-center gap-3 border border-border bg-card p-4 text-center"
+      className="card-hype group flex flex-col items-center gap-3 border border-border bg-card p-4 text-center"
     >
       <div className="relative size-16 shrink-0 overflow-hidden rounded-sm bg-vault-3">
-        <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+        <Image src={product.images[0]} alt={product.name} fill className="object-cover transition-transform duration-300 group-hover:scale-110" />
       </div>
       <TrendGauge score={product.trendScore} size={88} />
       <div>
