@@ -43,9 +43,9 @@ export function HowItWorks() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="flex flex-col gap-3 border border-border bg-card p-5"
+            className="card-hype group flex flex-col gap-3 border border-border bg-card p-5"
           >
-            <step.icon className="size-6 text-acid" />
+            <step.icon className="size-6 text-acid transition-transform duration-200 group-hover:scale-110" />
             <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{step.title}</p>
             <p className="text-sm text-foreground/90">{step.desc}</p>
           </motion.div>

@@ -79,11 +79,11 @@ export function Hero() {
       </div>
 
       <div className="relative border-t border-border py-4">
-        <div className="flex w-max animate-marquee gap-12">
+        <div className="flex w-max animate-marquee gap-12 hover:paused">
           {[...BRAND_MARQUEE, ...BRAND_MARQUEE].map((b, i) => (
             <span
               key={i}
-              className="shrink-0 font-display text-2xl tracking-wide text-muted-foreground/40 sm:text-3xl"
+              className="shrink-0 font-display text-2xl tracking-wide text-muted-foreground/40 transition-colors duration-200 hover:text-acid sm:text-3xl"
             >
               {b}
             </span>
