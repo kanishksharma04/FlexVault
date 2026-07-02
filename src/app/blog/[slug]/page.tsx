@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export default async function BlogPostPage({ params }: Props) {
         {post.author.name} · {new Date(post.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
       </p>
       <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-vault-3">
-        <Image src={post.coverImage} alt={post.title} fill className="object-cover" />
+        <FallbackImage src={post.coverImage} fallbackSeed={post.title} alt={post.title} fill className="object-cover" />
       </div>
       <div className="mt-8 whitespace-pre-line text-sm leading-relaxed text-foreground/90">
         {post.content}

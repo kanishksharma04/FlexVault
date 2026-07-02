@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Countdown } from "@/components/vault/countdown";
 import { ProductCard, type ProductCardData } from "@/components/vault/product-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 type DropSectionProps = {
   title: string;
@@ -28,7 +28,7 @@ export function DropSection({ title, slug, description, coverImage, countdownTar
           className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-center"
         >
           <div className="relative aspect-[16/10] overflow-hidden rounded-md border border-border">
-            <Image src={coverImage} alt={title} fill className="object-cover" />
+            <FallbackImage src={coverImage} fallbackSeed={title} alt={title} fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-vault via-transparent to-transparent" />
             <Badge variant="hype" className="absolute left-4 top-4">
               Active Drop

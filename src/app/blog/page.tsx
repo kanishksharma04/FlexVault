@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Newspaper } from "lucide-react";
 import { db } from "@/lib/db";
 import { SectionHeading } from "@/components/vault/section-heading";
 import { EmptyState } from "@/components/vault/empty-state";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +25,7 @@ export default async function BlogIndexPage() {
           {posts.map((post) => (
             <Link key={post.id} href={`/blog/${post.slug}`} className="card-hype group flex flex-col overflow-hidden border border-border bg-card">
               <div className="relative aspect-[16/9] w-full overflow-hidden bg-vault-3">
-                <Image src={post.coverImage} alt={post.title} fill className="object-cover" />
+                <FallbackImage src={post.coverImage} fallbackSeed={post.title} alt={post.title} fill className="object-cover" />
               </div>
               <div className="flex flex-col gap-2 p-4">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
