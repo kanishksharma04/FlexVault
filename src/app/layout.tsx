@@ -24,7 +24,8 @@ const fontData = Space_Mono({
   subsets: ["latin"],
 });
 
-const TITLE = "Flex Vault — Drip. Verified. Delivered.";
+const TITLE = "Flex Vault";
+const OG_TITLE = "Flex Vault — Drip. Verified. Delivered.";
 const DESCRIPTION =
   "India's authenticated marketplace for hype culture — sneakers, streetwear, diecast, watches, and accessories. Multi-layer verified, delivered PAN-India in 2-3 days.";
 
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: TITLE,
+    title: OG_TITLE,
     description: DESCRIPTION,
     siteName: "Flex Vault",
     type: "website",
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
+    title: OG_TITLE,
     description: DESCRIPTION,
   },
 };
