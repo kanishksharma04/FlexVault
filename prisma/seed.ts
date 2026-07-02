@@ -186,6 +186,7 @@ async function main() {
     { name: "Le Chiquito Bag", brand: "Jacquemus", categoryId: accessories.id, priceRange: [45000, 70000] },
     { name: "St Louis Tote PM", brand: "Goyard", categoryId: accessories.id, priceRange: [90000, 140000] },
     { name: "Re-Nylon Crossbody", brand: "Prada", categoryId: accessories.id, priceRange: [70000, 110000] },
+    { name: "Saddle Bag", brand: "Dior", categoryId: accessories.id, priceRange: [90000, 140000] },
     // Watches
     { name: "Submariner Date Black", brand: "Rolex", categoryId: watches.id, priceRange: [950000, 1300000] },
     { name: "Daytona Panda", brand: "Rolex", categoryId: watches.id, priceRange: [1800000, 2600000] },

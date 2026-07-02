@@ -33,6 +33,10 @@ export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
     "https://krazycaterpillar.com/cdn/shop/products/1_1428f574-2715-4d06-8b4c-0113504d9829_1800x1800.jpg",
     "https://krazycaterpillar.com/cdn/shop/products/2_9edc2742-c643-44b8-9c46-a09fd36ae31c_1800x1800.jpg",
   ],
+  "Dior Saddle Bag": [
+    "https://www.fashionphile.com/cdn/shop/files/a345413078d60ab00a956c55ef07e9d6.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/19a795bac70c72b5b33f878675857783.jpg",
+  ],
   "Nike Dunk Low Panda": [
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img01.jpg",
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img02.jpg",
