@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Countdown } from "@/components/vault/countdown";
-import { ProductCard, type ProductCardData } from "@/components/vault/product-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FallbackImage } from "@/components/ui/fallback-image";
@@ -14,20 +13,19 @@ type DropSectionProps = {
   description: string;
   coverImage: string;
   countdownTarget: Date;
-  products: ProductCardData[];
 };
 
-export function DropSection({ title, slug, description, coverImage, countdownTarget, products }: DropSectionProps) {
+export function DropSection({ title, slug, description, coverImage, countdownTarget }: DropSectionProps) {
   return (
     <section className="border-y border-border bg-vault-2">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-center"
+          className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-center"
         >
-          <div className="relative aspect-[16/10] overflow-hidden rounded-md border border-border">
+          <div className="relative aspect-[16/8] overflow-hidden rounded-md border border-border">
             <FallbackImage src={coverImage} fallbackSeed={title} alt={title} fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-vault via-transparent to-transparent" />
             <Badge variant="hype" className="absolute left-4 top-4 animate-pulse-glow-hype">
@@ -44,14 +42,6 @@ export function DropSection({ title, slug, description, coverImage, countdownTar
             </Button>
           </div>
         </motion.div>
-
-        {products.length > 0 && (
-          <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {products.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );

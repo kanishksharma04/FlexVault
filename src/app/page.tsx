@@ -29,7 +29,6 @@ export default async function Home() {
           description={drop.description}
           coverImage={drop.coverImage}
           countdownTarget={drop.countdownTarget}
-          products={drop.products}
         />
       )}
       <TrendingGrid products={trending} />

@@ -24,35 +24,10 @@ export async function getTrendingProducts(limit = 8): Promise<ProductCardData[]>
 }
 
 export async function getActiveDrop() {
-  const drop = await db.drop.findFirst({
+  return db.drop.findFirst({
     where: { isActive: true },
     orderBy: { dropDate: "asc" },
-    include: {
-      featuredProducts: {
-        include: {
-          product: {
-            include: {
-              listings: { where: { status: "ACTIVE" }, orderBy: { price: "asc" }, take: 1 },
-              trendHistory: { orderBy: { calculatedAt: "desc" }, take: 1 },
-            },
-          },
-        },
-      },
-    },
   });
-  if (!drop) return null;
-
-  const products: ProductCardData[] = drop.featuredProducts.map((fp) => ({
-    slug: fp.product.slug,
-    name: fp.product.name,
-    brand: fp.product.brand,
-    images: fp.product.images,
-    fromPrice: fp.product.listings[0]?.price ?? null,
-    trendScore: fp.product.trendHistory[0]?.score ?? fp.product.baseTrendScore,
-    listingCount: fp.product.listings.length,
-  }));
-
-  return { ...drop, products };
 }
 
 export async function getCategoryCounts() {
