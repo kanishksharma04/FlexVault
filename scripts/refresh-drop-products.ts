@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "./lib/db";
 
-const db = new PrismaClient();
 
 const FEATURED_COUNT = 5;
 

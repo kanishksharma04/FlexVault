@@ -1,7 +1,7 @@
-import { PrismaClient, ListingType, ListingStatus, AuthDecision, Condition } from "@prisma/client";
+import { ListingType, ListingStatus, AuthDecision, Condition } from "@prisma/client";
+import { db } from "./lib/db";
 import { generateCertificateHash } from "../src/lib/business/certificate";
 
-const db = new PrismaClient();
 
 function randInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
