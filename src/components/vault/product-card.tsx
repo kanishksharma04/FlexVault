@@ -77,7 +77,7 @@ export function ProductCard({ product, className }: { product: ProductCardData; 
           />
           {(temp === "hot" || temp === "blazing") && (
             <Badge variant="hype" className="absolute left-2 top-2">
-              <Flame />
+              <Flame className="animate-flicker" />
               {temp === "blazing" ? "Blazing" : "Hot"}
             </Badge>
           )}

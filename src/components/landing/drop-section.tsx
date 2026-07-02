@@ -30,7 +30,7 @@ export function DropSection({ title, slug, description, coverImage, countdownTar
           <div className="relative aspect-[16/10] overflow-hidden rounded-md border border-border">
             <FallbackImage src={coverImage} fallbackSeed={title} alt={title} fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-vault via-transparent to-transparent" />
-            <Badge variant="hype" className="absolute left-4 top-4">
+            <Badge variant="hype" className="absolute left-4 top-4 animate-pulse-glow-hype">
               Active Drop
             </Badge>
           </div>

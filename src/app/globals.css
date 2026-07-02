@@ -60,6 +60,7 @@
   --animate-marquee-fast: marquee 14s linear infinite;
   --animate-shimmer: shimmer 2.2s linear infinite;
   --animate-pulse-glow: pulse-glow 1.8s ease-in-out infinite;
+  --animate-pulse-glow-hype: pulse-glow-hype 1.8s ease-in-out infinite;
   --animate-flicker: flicker 3s ease-in-out infinite;
   --animate-hazard-scroll: hazard-scroll 1.5s linear infinite;
 }
@@ -250,6 +251,15 @@
   }
   50% {
     box-shadow: 0 0 0 8px rgba(198, 241, 53, 0);
+  }
+}
+
+@keyframes pulse-glow-hype {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 28, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 77, 28, 0);
   }
 }
 
