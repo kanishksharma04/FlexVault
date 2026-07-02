@@ -1,7 +1,7 @@
 import { db } from "./lib/db";
 
 
-const FEATURED_COUNT = 5;
+const FEATURED_COUNT = 8;
 
 async function main() {
   const drop = await db.drop.findFirst({ where: { isActive: true }, orderBy: { dropDate: "asc" } });
