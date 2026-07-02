@@ -21,24 +21,24 @@ function slugify(s: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-type NewAccessory = { name: string; brand: string; priceRange: [number, number] };
+type NewWatch = { name: string; brand: string; priceRange: [number, number] };
 
-const newAccessories: NewAccessory[] = [
-  { name: "Saddle Bag", brand: "Dior", priceRange: [90000, 140000] },
-  { name: "Jodie Bag", brand: "Bottega Veneta", priceRange: [130000, 200000] },
-  { name: "Love Bracelet", brand: "Cartier", priceRange: [500000, 750000] },
-  { name: "Le Cagole Bag", brand: "Balenciaga", priceRange: [110000, 170000] },
+const newWatches: NewWatch[] = [
+  { name: "Santos de Cartier", brand: "Cartier", priceRange: [550000, 750000] },
+  { name: "Luminor Marina", brand: "Panerai", priceRange: [650000, 900000] },
+  { name: "Carrera", brand: "TAG Heuer", priceRange: [300000, 450000] },
+  { name: "Pilot's Mark XVIII", brand: "IWC", priceRange: [280000, 380000] },
 ];
 
 async function main() {
-  const accessories = await db.category.findFirstOrThrow({ where: { slug: "accessories" } });
+  const watches = await db.category.findFirstOrThrow({ where: { slug: "watches" } });
   const authenticator = await db.user.findFirstOrThrow({ where: { role: "AUTHENTICATOR" } });
   const sellers = await db.user.findMany({ where: { role: "SELLER" } });
   if (sellers.length === 0) throw new Error("No sellers found in DB");
 
   const conditions = [Condition.NEW, Condition.LIKE_NEW, Condition.USED_EXCELLENT, Condition.USED_GOOD];
 
-  for (const item of newAccessories) {
+  for (const item of newWatches) {
     const fullName = `${item.brand} ${item.name}`;
     const images = PRODUCT_IMAGE_OVERRIDES[fullName];
     if (!images) throw new Error(`No sourced image for ${fullName}`);
@@ -56,7 +56,7 @@ async function main() {
         name: fullName,
         slug,
         brand: item.brand,
-        categoryId: accessories.id,
+        categoryId: watches.id,
         images,
         description: `Authenticated ${fullName}, verified by Flex Vault's multi-layer inspection process. Every unit is cross-checked against ${item.brand}'s construction, materials, and packaging references before it clears the vault.`,
         releaseDate: new Date(Date.now() - releaseDaysAgo * 86_400_000),

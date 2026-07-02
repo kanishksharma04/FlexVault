@@ -1,6 +1,50 @@
 // Curated real product photography, sourced and hotlink-verified from retailer/marketplace CDNs.
 // Keyed by the exact `Product.name` value used in prisma/seed.ts (`${brand} ${name}`).
 export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
+  "Bottega Veneta Jodie Bag": [
+    "https://www.fashionphile.com/cdn/shop/files/3429944eee1bc3ff6b984b56f16dee48.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/15576e6b2c0a28a80fd2a1f79df659ad.jpg",
+  ],
+  "Cartier Love Bracelet": [
+    "https://www.fashionphile.com/cdn/shop/files/e49e89ada55e42ff8df4afa916cde547.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/482f2c448042a490cec7e6b9fba0d25a.jpg",
+  ],
+  "Balenciaga Le Cagole Bag": [
+    "https://www.fashionphile.com/cdn/shop/files/e44e9e2b5449ac6a56511ff0eb8edd9f.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/0f1c0a481ced614dc615489ecc2a27ac.jpg",
+  ],
+  "Cartier Santos de Cartier": [
+    "https://www.fashionphile.com/cdn/shop/files/9f8ede8672b1034861ca5615bb457868.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/070f4209f059227fd24b4d23cf7f1d72.jpg",
+  ],
+  "Panerai Luminor Marina": [
+    "https://www.fashionphile.com/cdn/shop/files/92e05d3f6d3d7d9f51c7bfa830f60466.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/1b8dac146fd35c4e3455e15cd34529ef_6af3c14a-2661-4b73-8fc9-f3e6648e90f3.jpg",
+  ],
+  "TAG Heuer Carrera": [
+    "https://www.fashionphile.com/cdn/shop/files/37b359e1d6d815cd0104960244257ed9.jpg",
+    "https://www.fashionphile.com/cdn/shop/files/106838b5dcaef86024b010954ce08b59.jpg",
+  ],
+  "IWC Pilot's Mark XVIII": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/i/w/iwc-pilot_s-mark-xviii-automatic-black-dial-men_s-watch-iw327009.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/i/w/iwc-pilots-mark-xviii-silver-plated-dial-automatic-men_s-watch-iw327012.jpg",
+  ],
+  "Le Labo Santal 33 EDP 100ml": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/l/e/le-labo-unisex-santal-33-edp-spray-34-oz-fragrances-842185115861.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/l/e/le-labo-unisex-santal-33-edp-spray-17-oz-50-ml-842185115878.jpg",
+  ],
+  "Byredo Gypsy Water EDP 100ml": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/b/y/byredo-gypsy-water-eau-de-parfum-spray-100ml34oz-7340032806168.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/b/y/byredo-unisex-gypsy-water-edp-spray-34-oz-fragrances-7340032875294.jpg",
+  ],
+  "Jean Paul Gaultier Le Male EDT 125ml": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/j/e/jean-paul-gaultier-mens-le-male-edt-spray-42-oz-fragrances-3423470317534.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/j/e/jean-paul-gaultier-mens-le-male-edt-spray-14-oz-fragrances-8435415012607.jpg",
+  ],
+  "Giorgio Armani Acqua di Gio EDT 100ml": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/a/c/acqua-di-gio-men-giorgio-armani-edt-spray-33-oz-m-3360372058878.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/a/c/acqua-di-gio-men-giorgio-armani-edt-spray-17-oz-m-50-ml-3360372058861.jpg",
+  ],
   "Palace Tri-Ferg Hoodie": [
     "https://images.stockx.com/images/Palace-Tri-Ferg-Hood-Orange-White.jpg",
     "https://images.stockx.com/images/Palace-Tri-Ferg-Hood-Orange-White-2.jpg",

@@ -187,6 +187,9 @@ async function main() {
     { name: "St Louis Tote PM", brand: "Goyard", categoryId: accessories.id, priceRange: [90000, 140000] },
     { name: "Re-Nylon Crossbody", brand: "Prada", categoryId: accessories.id, priceRange: [70000, 110000] },
     { name: "Saddle Bag", brand: "Dior", categoryId: accessories.id, priceRange: [90000, 140000] },
+    { name: "Jodie Bag", brand: "Bottega Veneta", categoryId: accessories.id, priceRange: [130000, 200000] },
+    { name: "Love Bracelet", brand: "Cartier", categoryId: accessories.id, priceRange: [500000, 750000] },
+    { name: "Le Cagole Bag", brand: "Balenciaga", categoryId: accessories.id, priceRange: [110000, 170000] },
     // Watches
     { name: "Submariner Date Black", brand: "Rolex", categoryId: watches.id, priceRange: [950000, 1300000] },
     { name: "Daytona Panda", brand: "Rolex", categoryId: watches.id, priceRange: [1800000, 2600000] },
@@ -196,6 +199,10 @@ async function main() {
     { name: "Nautilus 5711", brand: "Patek Philippe", categoryId: watches.id, priceRange: [6000000, 9000000] },
     { name: "5 Sports SRPD Automatic", brand: "Seiko", categoryId: watches.id, priceRange: [18000, 28000] },
     { name: "Black Bay Fifty-Eight", brand: "Tudor", categoryId: watches.id, priceRange: [280000, 380000] },
+    { name: "Santos de Cartier", brand: "Cartier", categoryId: watches.id, priceRange: [550000, 750000] },
+    { name: "Luminor Marina", brand: "Panerai", categoryId: watches.id, priceRange: [650000, 900000] },
+    { name: "Carrera", brand: "TAG Heuer", categoryId: watches.id, priceRange: [300000, 450000] },
+    { name: "Pilot's Mark XVIII", brand: "IWC", categoryId: watches.id, priceRange: [280000, 380000] },
     // Perfumes
     { name: "Aventus EDP 100ml", brand: "Creed", categoryId: perfumes.id, priceRange: [22000, 32000] },
     { name: "Sauvage Elixir 60ml", brand: "Dior", categoryId: perfumes.id, priceRange: [8500, 13000] },
@@ -205,6 +212,10 @@ async function main() {
     { name: "Jazz Club EDT 100ml", brand: "Maison Margiela", categoryId: perfumes.id, priceRange: [6000, 9500] },
     { name: "Baccarat Rouge 540 EDP 70ml", brand: "Maison Francis Kurkdjian", categoryId: perfumes.id, priceRange: [24000, 34000] },
     { name: "Black Opium EDP 90ml", brand: "YSL", categoryId: perfumes.id, priceRange: [9000, 14000] },
+    { name: "Santal 33 EDP 100ml", brand: "Le Labo", categoryId: perfumes.id, priceRange: [20000, 28000] },
+    { name: "Gypsy Water EDP 100ml", brand: "Byredo", categoryId: perfumes.id, priceRange: [18000, 25000] },
+    { name: "Le Male EDT 125ml", brand: "Jean Paul Gaultier", categoryId: perfumes.id, priceRange: [7000, 11000] },
+    { name: "Acqua di Gio EDT 100ml", brand: "Giorgio Armani", categoryId: perfumes.id, priceRange: [7000, 11000] },
   ];
 
   const products = [];

@@ -26,6 +26,10 @@ type NewPerfume = { name: string; brand: string; priceRange: [number, number] };
 const newPerfumes: NewPerfume[] = [
   { name: "Baccarat Rouge 540 EDP 70ml", brand: "Maison Francis Kurkdjian", priceRange: [24000, 34000] },
   { name: "Black Opium EDP 90ml", brand: "YSL", priceRange: [9000, 14000] },
+  { name: "Santal 33 EDP 100ml", brand: "Le Labo", priceRange: [20000, 28000] },
+  { name: "Gypsy Water EDP 100ml", brand: "Byredo", priceRange: [18000, 25000] },
+  { name: "Le Male EDT 125ml", brand: "Jean Paul Gaultier", priceRange: [7000, 11000] },
+  { name: "Acqua di Gio EDT 100ml", brand: "Giorgio Armani", priceRange: [7000, 11000] },
 ];
 
 async function main() {
