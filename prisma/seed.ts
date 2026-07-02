@@ -479,7 +479,7 @@ async function main() {
       title: "Vault Selects: Monsoon Heat Drop",
       slug: "vault-selects-monsoon-heat-drop",
       description: "A curated pre-order run of the pieces trending hardest across the vault this week — locked in early, delivered PAN-India.",
-      coverImage: mockProductImages("monsoon-heat-drop", "Monsoon Heat", 1)[0],
+      coverImage: "/images/drop-monsoon-heat.jpg",
       dropDate: new Date("2026-07-20T18:00:00+05:30"),
       countdownTarget: new Date("2026-07-20T18:00:00+05:30"),
       isActive: true,
