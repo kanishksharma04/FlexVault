@@ -17,6 +17,14 @@ export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
     "https://images.stockx.com/360/New-Balance-9060-Black/Images/New-Balance-9060-Black/Lv2/img01.jpg",
     "https://images.stockx.com/360/New-Balance-9060-Black/Images/New-Balance-9060-Black/Lv2/img02.jpg",
   ],
+  "Corteiz Alcatraz Hoodie Triple Black": [
+    "https://images.stockx.com/images/Corteiz-Alcatraz-Hoodie-Triple-Black.jpg",
+    "https://images.stockx.com/images/Corteiz-5-Starz-Alcatraz-Hoodie-Black.jpg",
+  ],
+  "Denim Tears Cotton Wreath Sweatshirt Black": [
+    "https://images.stockx.com/images/Denim-Tears-The-Cotton-Wreath-Sweatshirt-Black-ProductX.jpg",
+    "https://images.stockx.com/images/Denim-Tears-The-Cotton-Wreath-Sweatshirt-Black-ProductX-2.jpg",
+  ],
   "Nike Dunk Low Panda": [
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img01.jpg",
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img02.jpg",

@@ -173,6 +173,8 @@ async function main() {
     { name: "Essentials Hoodie Cream", brand: "Fear of God", categoryId: streetwear.id, subcategory: "Hoodies", priceRange: [9000, 15000] },
     { name: "Detroit Jacket", brand: "Carhartt WIP", categoryId: streetwear.id, priceRange: [11000, 18000] },
     { name: "Crewneck Navy", brand: "Aime Leon Dore", categoryId: streetwear.id, priceRange: [13000, 22000] },
+    { name: "Alcatraz Hoodie Triple Black", brand: "Corteiz", categoryId: streetwear.id, subcategory: "Hoodies", priceRange: [12000, 20000] },
+    { name: "Cotton Wreath Sweatshirt Black", brand: "Denim Tears", categoryId: streetwear.id, priceRange: [15000, 25000] },
     // Accessories
     { name: "Neverfull MM Monogram", brand: "Louis Vuitton", categoryId: accessories.id, priceRange: [150000, 220000] },
     { name: "Industrial Belt", brand: "Off-White", categoryId: accessories.id, priceRange: [18000, 28000] },
