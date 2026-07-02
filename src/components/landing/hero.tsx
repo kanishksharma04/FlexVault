@@ -49,7 +49,6 @@ export function Hero() {
   return (
     <section ref={ref} onMouseMove={onMouseMove} className="relative overflow-hidden border-b border-border">
       <div className="halftone pointer-events-none absolute inset-0 text-vault-3 opacity-40" />
-      <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-acid/10 blur-3xl" />
       {!reducedMotion && (
         <motion.div className="pointer-events-none absolute inset-0" style={{ background: spotlight }} />
       )}
