@@ -460,6 +460,12 @@ async function main() {
 
   // ── Blog posts ───────────────────────────────────────────────────────
   console.log("Seeding blog posts...");
+  const BLOG_COVER_OVERRIDES: Record<string, string> = {
+    "Top 5 Drops This Month": "/images/blog-top-5-drops.jpg",
+    "How Flex Vault Authentication Actually Works": "/images/blog-authentication.jpg",
+    "Diecast Is the Next Big Hype Category": "/images/blog-diecast-hype.jpg",
+    "Seller Tiers Explained: Bronze to Platinum": "/images/blog-seller-tiers.jpg",
+  };
   const posts = [
     { title: "Top 5 Drops This Month", excerpt: "The five releases every collector in the vault is watching right now.", published: true },
     { title: "How Flex Vault Authentication Actually Works", excerpt: "A walkthrough of our multi-layer inspection process, from intake to certificate.", published: true },
@@ -474,7 +480,7 @@ async function main() {
         slug: slugify(p.title),
         excerpt: p.excerpt,
         content: `${p.excerpt}\n\nFull editorial content for "${p.title}" goes here — authentication callouts, comparison photography, and market commentary curated by the Flex Vault editorial desk.`,
-        coverImage: mockProductImages(p.title, p.title, 1)[0],
+        coverImage: BLOG_COVER_OVERRIDES[p.title] ?? mockProductImages(p.title, p.title, 1)[0],
         authorId: admin.id,
         publishedAt: p.published ? new Date(Date.now() - randInt(1, 20) * 86_400_000) : null,
       },
