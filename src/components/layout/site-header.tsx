@@ -26,9 +26,10 @@ export async function SiteHeader() {
             <Link
               key={c.slug}
               href={`/browse/${c.slug}`}
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground transition hover:text-acid"
+              className="group relative font-mono text-xs uppercase tracking-wider text-muted-foreground transition hover:text-acid"
             >
               {c.label}
+              <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-acid transition-transform duration-200 ease-out group-hover:scale-x-100" />
             </Link>
           ))}
           <span className="h-4 w-px bg-border" />
@@ -36,9 +37,10 @@ export async function SiteHeader() {
             <Link
               key={n.href}
               href={n.href}
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground transition hover:text-acid"
+              className="group relative font-mono text-xs uppercase tracking-wider text-muted-foreground transition hover:text-acid"
             >
               {n.label}
+              <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-acid transition-transform duration-200 ease-out group-hover:scale-x-100" />
             </Link>
           ))}
         </nav>
