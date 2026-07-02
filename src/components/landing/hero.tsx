@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useMotionTemplate, useSpring, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 const HERO_LINE_1 = "DRIP.";
@@ -29,10 +30,29 @@ function AnimatedWord({ text, delay }: { text: string; delay: number }) {
 }
 
 export function Hero() {
+  const ref = useRef<HTMLElement>(null);
+  const reducedMotion = useReducedMotion();
+
+  const mvX = useMotionValue(0);
+  const mvY = useMotionValue(0);
+  const spotX = useSpring(mvX, { stiffness: 120, damping: 25 });
+  const spotY = useSpring(mvY, { stiffness: 120, damping: 25 });
+  const spotlight = useMotionTemplate`radial-gradient(600px circle at ${spotX}px ${spotY}px, rgba(198, 241, 53, 0.15), transparent 70%)`;
+
+  function onMouseMove(e: React.MouseEvent<HTMLElement>) {
+    if (reducedMotion || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    mvX.set(e.clientX - rect.left);
+    mvY.set(e.clientY - rect.top);
+  }
+
   return (
-    <section className="relative overflow-hidden border-b border-border">
+    <section ref={ref} onMouseMove={onMouseMove} className="relative overflow-hidden border-b border-border">
       <div className="halftone pointer-events-none absolute inset-0 text-vault-3 opacity-40" />
       <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-acid/10 blur-3xl" />
+      {!reducedMotion && (
+        <motion.div className="pointer-events-none absolute inset-0" style={{ background: spotlight }} />
+      )}
 
       <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 py-20 text-center sm:px-6 sm:py-28">
         <motion.span
