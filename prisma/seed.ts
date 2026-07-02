@@ -140,6 +140,7 @@ async function main() {
     { name: "Air Jordan 3 Retro Fire Red", brand: "Jordan", categoryId: sneakers.id, subcategory: "Basketball", priceRange: [18000, 29000] },
     { name: "Air Jordan 11 Retro Cool Grey", brand: "Jordan", categoryId: sneakers.id, subcategory: "Basketball", priceRange: [24000, 40000] },
     { name: "Air Jordan 4 Retro Black Cat", brand: "Jordan", categoryId: sneakers.id, subcategory: "Basketball", priceRange: [24000, 40000] },
+    { name: "Air Max 97 Silver Bullet", brand: "Nike", categoryId: sneakers.id, subcategory: "Running", priceRange: [9000, 15000] },
     { name: "Yeezy Boost 350 V2 Zebra", brand: "Adidas", categoryId: sneakers.id, subcategory: "Running", priceRange: [16000, 26000] },
     { name: "Yeezy Boost 350 V2 Bone", brand: "Adidas", categoryId: sneakers.id, subcategory: "Running", priceRange: [15000, 24000] },
     { name: "Samba OG Cloud White", brand: "Adidas", categoryId: sneakers.id, priceRange: [6500, 9500] },

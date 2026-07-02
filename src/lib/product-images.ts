@@ -1,6 +1,10 @@
 // Curated real product photography, sourced and hotlink-verified from retailer/marketplace CDNs.
 // Keyed by the exact `Product.name` value used in prisma/seed.ts (`${brand} ${name}`).
 export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
+  "Nike Air Max 97 Silver Bullet": [
+    "https://images.stockx.com/360/Nike-Air-Max-97-OG-Silver-Bullet-2022/Images/Nike-Air-Max-97-OG-Silver-Bullet-2022/Lv2/img01.jpg",
+    "https://images.stockx.com/360/Nike-Air-Max-97-OG-Silver-Bullet-2022/Images/Nike-Air-Max-97-OG-Silver-Bullet-2022/Lv2/img02.jpg",
+  ],
   "Bottega Veneta Jodie Bag": [
     "https://www.fashionphile.com/cdn/shop/files/3429944eee1bc3ff6b984b56f16dee48.jpg",
     "https://www.fashionphile.com/cdn/shop/files/15576e6b2c0a28a80fd2a1f79df659ad.jpg",

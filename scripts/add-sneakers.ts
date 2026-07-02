@@ -27,6 +27,7 @@ const newSneakers: NewSneaker[] = [
   { name: "Air Jordan 4 Retro Black Cat", brand: "Jordan", subcategory: "Basketball", priceRange: [24000, 40000] },
   { name: "Gazelle Indoor Navy", brand: "Adidas", priceRange: [7500, 11000] },
   { name: "9060 Black", brand: "New Balance", priceRange: [13000, 19000] },
+  { name: "Air Max 97 Silver Bullet", brand: "Nike", subcategory: "Running", priceRange: [9000, 15000] },
 ];
 
 async function main() {
