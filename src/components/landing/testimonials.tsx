@@ -35,11 +35,11 @@ export function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="flex flex-col gap-3 border border-border bg-card p-5"
+              className="card-hype group flex flex-col gap-3 border border-border bg-card p-5"
             >
               <div className="flex gap-0.5 text-gold">
                 {Array.from({ length: 5 }).map((_, s) => (
-                  <Star key={s} className="size-3.5 fill-current" />
+                  <Star key={s} className="size-3.5 fill-current transition-transform duration-200 group-hover:scale-110" />
                 ))}
               </div>
               <p className="text-sm text-foreground/90">&ldquo;{q.quote}&rdquo;</p>
