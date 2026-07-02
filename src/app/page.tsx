@@ -7,6 +7,8 @@ import { Testimonials } from "@/components/landing/testimonials";
 import { ClosingCta } from "@/components/landing/closing-cta";
 import { getTrendingProducts, getActiveDrop, getCategoryCounts } from "@/lib/queries/catalog";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const [trending, drop, categories] = await Promise.all([
     getTrendingProducts(8),
