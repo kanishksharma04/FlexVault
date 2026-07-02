@@ -5,6 +5,18 @@ export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
     "https://images.stockx.com/images/Palace-Tri-Ferg-Hood-Orange-White.jpg",
     "https://images.stockx.com/images/Palace-Tri-Ferg-Hood-Orange-White-2.jpg",
   ],
+  "Jordan Air Jordan 4 Retro Black Cat": [
+    "https://images.stockx.com/360/Air-Jordan-4-Retro-Black-Cat-2020/Images/Air-Jordan-4-Retro-Black-Cat-2020/Lv2/img01.jpg",
+    "https://images.stockx.com/360/Air-Jordan-4-Retro-Black-Cat-2020/Images/Air-Jordan-4-Retro-Black-Cat-2020/Lv2/img02.jpg",
+  ],
+  "Adidas Gazelle Indoor Navy": [
+    "https://images.stockx.com/360/adidas-Gazelle-Indoor-College-Navy-Gum/Images/adidas-Gazelle-Indoor-College-Navy-Gum/Lv2/img01.jpg",
+    "https://images.stockx.com/360/adidas-Gazelle-Indoor-College-Navy-Gum/Images/adidas-Gazelle-Indoor-College-Navy-Gum/Lv2/img02.jpg",
+  ],
+  "New Balance 9060 Black": [
+    "https://images.stockx.com/360/New-Balance-9060-Black/Images/New-Balance-9060-Black/Lv2/img01.jpg",
+    "https://images.stockx.com/360/New-Balance-9060-Black/Images/New-Balance-9060-Black/Lv2/img02.jpg",
+  ],
   "Nike Dunk Low Panda": [
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img01.jpg",
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img02.jpg",
