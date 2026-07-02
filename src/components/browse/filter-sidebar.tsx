@@ -1,11 +1,14 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback, useState, useTransition, type ReactNode } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const CONDITIONS = [
   { value: "NEW", label: "New" },
@@ -20,12 +23,20 @@ export function FilterSidebar({ brands, sizes }: { brands: string[]; sizes: stri
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const activeBrands = searchParams.getAll("brand");
   const activeSizes = searchParams.getAll("size");
   const activeConditions = searchParams.getAll("condition");
   const minPrice = searchParams.get("minPrice") ?? "";
   const maxPrice = searchParams.get("maxPrice") ?? "";
+
+  const activeCount =
+    activeBrands.length +
+    activeSizes.length +
+    activeConditions.length +
+    (minPrice ? 1 : 0) +
+    (maxPrice ? 1 : 0);
 
   const update = useCallback(
     (mutator: (params: URLSearchParams) => void) => {
@@ -60,15 +71,8 @@ export function FilterSidebar({ brands, sizes }: { brands: string[]; sizes: stri
     startTransition(() => router.push(pathname, { scroll: false }));
   }
 
-  return (
-    <aside className="flex w-full flex-col gap-6 lg:w-56 lg:shrink-0">
-      <div className="flex items-center justify-between">
-        <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Filters</h3>
-        <Button variant="link" size="sm" className="h-auto p-0 text-[11px]" onClick={clearAll}>
-          Clear all
-        </Button>
-      </div>
-
+  const fields = (
+    <>
       <div className="flex flex-col gap-2">
         <Label>Price (₹)</Label>
         <div className="flex items-center gap-2">
@@ -140,6 +144,59 @@ export function FilterSidebar({ brands, sizes }: { brands: string[]; sizes: stri
           ))}
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  const header = (extra?: ReactNode) => (
+    <div className="flex items-center justify-between">
+      <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Filters</h3>
+      <div className="flex items-center gap-3">
+        {activeCount > 0 && (
+          <Button variant="link" size="sm" className="h-auto p-0 text-[11px]" onClick={clearAll}>
+            Clear all
+          </Button>
+        )}
+        {extra}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop: always-visible sidebar */}
+      <aside className="hidden w-full flex-col gap-6 lg:flex lg:w-56 lg:shrink-0">
+        {header()}
+        {fields}
+      </aside>
+
+      {/* Mobile/tablet: collapsed behind a trigger so the product grid isn't pushed below the fold */}
+      <div className="lg:hidden">
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <SlidersHorizontal className="size-4" />
+              Filters
+              {activeCount > 0 && (
+                <Badge variant="hype" className="ml-1">
+                  {activeCount}
+                </Badge>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col gap-6 px-4 pb-6">
+              {header()}
+              {fields}
+              <Button className="mt-2 w-full" onClick={() => setMobileOpen(false)}>
+                Show results
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </>
   );
 }
