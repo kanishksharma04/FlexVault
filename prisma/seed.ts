@@ -203,6 +203,8 @@ async function main() {
     { name: "Naxos EDP 50ml", brand: "Xerjoff", categoryId: perfumes.id, priceRange: [18000, 26000] },
     { name: "Layton EDP 125ml", brand: "Parfums de Marly", categoryId: perfumes.id, priceRange: [14000, 20000] },
     { name: "Jazz Club EDT 100ml", brand: "Maison Margiela", categoryId: perfumes.id, priceRange: [6000, 9500] },
+    { name: "Baccarat Rouge 540 EDP 70ml", brand: "Maison Francis Kurkdjian", categoryId: perfumes.id, priceRange: [24000, 34000] },
+    { name: "Black Opium EDP 90ml", brand: "YSL", categoryId: perfumes.id, priceRange: [9000, 14000] },
   ];
 
   const products = [];

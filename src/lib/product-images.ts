@@ -37,6 +37,14 @@ export const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
     "https://www.fashionphile.com/cdn/shop/files/a345413078d60ab00a956c55ef07e9d6.jpg",
     "https://www.fashionphile.com/cdn/shop/files/19a795bac70c72b5b33f878675857783.jpg",
   ],
+  "Maison Francis Kurkdjian Baccarat Rouge 540 EDP 70ml": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/m/a/maison-francis-kurkdjian-unisex-baccarat-rouge-540-edp-spray-24-oz-70-ml-3700559603116.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/m/a/maison-francis-kurkdjian-unisex-baccarat-rouge-540-edp-spray-12-oz-fragrances-3700559608654.jpg",
+  ],
+  "YSL Black Opium EDP 90ml": [
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/b/l/black-opium-ysl-edp-spray-30-oz-90-ml-w-3365440787971.jpg",
+    "https://cdn2.jomashop.com/media/catalog/product/cache/b3e31d40bbb1abcc90b26106659d5d3f/b/l/black-opium-ysl-edp-spray-intense-30-oz-90-ml-w-3614272443716.jpg",
+  ],
   "Nike Dunk Low Panda": [
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img01.jpg",
     "https://images.stockx.com/360/Nike-Dunk-Low-Retro-White-Black-2021/Images/Nike-Dunk-Low-Retro-White-Black-2021/Lv2/img02.jpg",
