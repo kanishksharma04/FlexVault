@@ -41,40 +41,44 @@ export async function submitOrder(_prev: CheckoutState, formData: FormData): Pro
     return { error: "One or more items in your cart are no longer available." };
   }
 
-  const address = await db.address.create({
-    data: { userId: session.user.id, fullName, line1, line2: line2 || null, city, state, pincode, phone },
-  });
-
-  const orderIds: string[] = [];
-
-  for (const listing of listings) {
-    const baseCommission = SELLER_TIER_COMMISSION[listing.seller.sellerTier];
-    const commissionRate = listing.seller.isProMember
-      ? Math.max(0.02, baseCommission - PRO_MEMBERSHIP_COMMISSION_DISCOUNT)
-      : baseCommission;
-
-    const insuranceOpted = listing.price >= INSURANCE_THRESHOLD_INR && insuranceListingIds.has(listing.id);
-    const insuranceFee = insuranceOpted ? Math.round(listing.price * INSURANCE_RATE) : 0;
-
-    const order = await db.order.create({
-      data: {
-        buyerId: session.user.id,
-        listingId: listing.id,
-        price: listing.price,
-        commissionRate,
-        insuranceOpted,
-        insuranceFee,
-        addressId: address.id,
-        status: "PLACED",
-        trackingEvents: [
-          { status: "PLACED", label: "Order placed & payment secured in escrow", at: new Date().toISOString() },
-        ],
-      },
+  const orderIds = await db.$transaction(async (tx) => {
+    const address = await tx.address.create({
+      data: { userId: session.user.id, fullName, line1, line2: line2 || null, city, state, pincode, phone },
     });
 
-    await db.listing.update({ where: { id: listing.id }, data: { status: "SOLD" } });
-    orderIds.push(order.id);
-  }
+    const ids: string[] = [];
+
+    for (const listing of listings) {
+      const baseCommission = SELLER_TIER_COMMISSION[listing.seller.sellerTier];
+      const commissionRate = listing.seller.isProMember
+        ? Math.max(0.02, baseCommission - PRO_MEMBERSHIP_COMMISSION_DISCOUNT)
+        : baseCommission;
+
+      const insuranceOpted = listing.price >= INSURANCE_THRESHOLD_INR && insuranceListingIds.has(listing.id);
+      const insuranceFee = insuranceOpted ? Math.round(listing.price * INSURANCE_RATE) : 0;
+
+      const order = await tx.order.create({
+        data: {
+          buyerId: session.user.id,
+          listingId: listing.id,
+          price: listing.price,
+          commissionRate,
+          insuranceOpted,
+          insuranceFee,
+          addressId: address.id,
+          status: "PLACED",
+          trackingEvents: [
+            { status: "PLACED", label: "Order placed & payment secured in escrow", at: new Date().toISOString() },
+          ],
+        },
+      });
+
+      await tx.listing.update({ where: { id: listing.id }, data: { status: "SOLD" } });
+      ids.push(order.id);
+    }
+
+    return ids;
+  });
 
   revalidatePath("/dashboard/buyer");
   return { success: true, orderIds };
