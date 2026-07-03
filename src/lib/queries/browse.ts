@@ -41,6 +41,7 @@ export async function getFilteredProducts(filters: BrowseFilters) {
           OR: [
             { name: { contains: filters.query, mode: "insensitive" } },
             { brand: { contains: filters.query, mode: "insensitive" } },
+            { subcategory: { contains: filters.query, mode: "insensitive" } },
           ],
         }
       : {}),
