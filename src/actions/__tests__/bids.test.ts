@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { rateLimitAction } from "@/lib/rate-limit";
 import { placeBid } from "../bids";
@@ -111,7 +112,7 @@ describe("placeBid", () => {
     expect(result.error).toBe("Bid must be higher than ₹800.");
   });
 
-  it("places a winning bid and outbids the previous top bid", async () => {
+  it("places a winning bid and outbids the previous top bid inside a serializable transaction", async () => {
     mockAuth.mockResolvedValue(session);
     mockActiveAuction({ price: 1000, topBid: 1000 });
     mockDb.bid.updateMany.mockResolvedValue({ count: 1 });
@@ -127,5 +128,23 @@ describe("placeBid", () => {
     expect(mockDb.bid.create).toHaveBeenCalledWith({
       data: { listingId: "l1", bidderId: "bidder1", amount: 1100, status: "ACTIVE" },
     });
+    expect(mockDb.$transaction).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+    );
+  });
+
+  it("surfaces a friendly error when two racing bids conflict at the database level", async () => {
+    mockAuth.mockResolvedValue(session);
+    mockDb.$transaction.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Transaction failed due to a write conflict", {
+        code: "P2034",
+        clientVersion: "test",
+      })
+    );
+
+    const result = await placeBid({}, formData({ listingId: "l1", amount: "1100" }));
+
+    expect(result.error).toMatch(/try again/i);
   });
 });
