@@ -14,7 +14,7 @@ trend detection, bidding, and PAN-India delivery tracking.
 - **Database:** PostgreSQL via Prisma ORM
 - **Auth:** Auth.js (NextAuth v5) — email/password + optional Google OAuth, role-based access
 - **Data fetching:** React Server Components + TanStack Query for client interactivity (search, cart)
-- **File uploads:** Local disk adapter behind an `UploadAdapter` interface (swap in S3/Cloudinary later)
+- **File uploads:** `UploadAdapter` interface — Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set, local disk otherwise (dev only)
 - **Validation:** Zod
 
 ## Getting Started
@@ -44,6 +44,7 @@ cp .env.example .env
 | `AUTH_SECRET` | Random secret for Auth.js — generate with `npx auth secret` |
 | `NEXTAUTH_URL` | App URL, e.g. `http://localhost:3000` |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Optional — leave blank to disable Google sign-in |
+| `BLOB_READ_WRITE_TOKEN` | Optional — leave blank to fall back to local-disk uploads in dev; set automatically when a Blob store is connected on Vercel |
 
 ### 4. Set up the database
 
