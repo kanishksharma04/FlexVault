@@ -11,6 +11,8 @@ export type CheckoutState = {
   orderIds?: string[];
 };
 
+class ListingUnavailableError extends Error {}
+
 export async function submitOrder(_prev: CheckoutState, formData: FormData): Promise<CheckoutState> {
   const session = await auth();
   if (!session?.user) return { error: "You must be logged in to check out." };
@@ -57,6 +59,14 @@ export async function submitOrder(_prev: CheckoutState, formData: FormData): Pro
       const insuranceOpted = listing.price >= INSURANCE_THRESHOLD_INR && insuranceListingIds.has(listing.id);
       const insuranceFee = insuranceOpted ? Math.round(listing.price * INSURANCE_RATE) : 0;
 
+      // Conditional update so two concurrent checkouts can't both claim the
+      // same listing — only the first to flip ACTIVE -> SOLD wins.
+      const claimed = await tx.listing.updateMany({
+        where: { id: listing.id, status: "ACTIVE" },
+        data: { status: "SOLD" },
+      });
+      if (claimed.count === 0) throw new ListingUnavailableError();
+
       const order = await tx.order.create({
         data: {
           buyerId: session.user.id,
@@ -73,12 +83,18 @@ export async function submitOrder(_prev: CheckoutState, formData: FormData): Pro
         },
       });
 
-      await tx.listing.update({ where: { id: listing.id }, data: { status: "SOLD" } });
       ids.push(order.id);
     }
 
     return ids;
+  }).catch((err) => {
+    if (err instanceof ListingUnavailableError) return null;
+    throw err;
   });
+
+  if (!orderIds) {
+    return { error: "One or more items in your cart were just purchased by someone else." };
+  }
 
   revalidatePath("/dashboard/buyer");
   return { success: true, orderIds };
