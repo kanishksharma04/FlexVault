@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { NextRequest } from "next/server";
+import { headers } from "next/headers";
 
 // No Redis credentials until a database is connected (e.g. via the Vercel
 // Storage tab or Upstash console) — skip limiting rather than crash routes
@@ -26,8 +27,10 @@ function getLimiter(name: string, requests: number, window: `${number} ${"s" | "
   return limiter;
 }
 
-function clientIp(req: NextRequest) {
-  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? req.headers.get("x-real-ip") ?? "unknown";
+function clientIpFromHeaders(reqHeaders: Headers) {
+  return (
+    reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? reqHeaders.get("x-real-ip") ?? "unknown"
+  );
 }
 
 /**
@@ -44,7 +47,7 @@ export async function rateLimit(
   const limiter = getLimiter(name, requests, window);
   if (!limiter) return null;
 
-  const { success, limit, remaining, reset } = await limiter.limit(clientIp(req));
+  const { success, limit, remaining, reset } = await limiter.limit(clientIpFromHeaders(req.headers));
   if (success) return null;
 
   return Response.json(
@@ -58,4 +61,21 @@ export async function rateLimit(
       },
     }
   );
+}
+
+/**
+ * Same per-IP limiting as `rateLimit`, but for use in Server Actions and
+ * other request-scoped contexts that don't have a `NextRequest` (e.g.
+ * `next-auth`'s `authorize` callback). Returns an error message when the
+ * limit for `name` has been exceeded, or null when the request is allowed.
+ */
+export async function rateLimitAction(name: string, requests: number, window: `${number} ${"s" | "m"}`) {
+  const limiter = getLimiter(name, requests, window);
+  if (!limiter) return null;
+
+  const reqHeaders = await headers();
+  const { success } = await limiter.limit(clientIpFromHeaders(reqHeaders));
+  if (success) return null;
+
+  return "Too many attempts. Please slow down and try again shortly.";
 }

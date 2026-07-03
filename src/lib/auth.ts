@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
 import { authConfig } from "@/lib/auth.config";
+import { rateLimitAction } from "@/lib/rate-limit";
 
 const googleConfigured = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
@@ -28,6 +29,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
+        const limitError = await rateLimitAction("login", 10, "1 m");
+        if (limitError) throw new Error(limitError);
+
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 

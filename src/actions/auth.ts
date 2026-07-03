@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { signupSchema } from "@/lib/validations/auth";
+import { rateLimitAction } from "@/lib/rate-limit";
 
 export type SignupState = {
   errors?: Record<string, string[]>;
@@ -11,6 +12,9 @@ export type SignupState = {
 };
 
 export async function registerUser(_prevState: SignupState, formData: FormData): Promise<SignupState> {
+  const limitError = await rateLimitAction("signup", 5, "1 m");
+  if (limitError) return { formError: limitError };
+
   const parsed = signupSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
