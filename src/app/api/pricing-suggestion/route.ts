@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { suggestPriceRange } from "@/lib/business/pricing";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  const limited = await rateLimit(req, "pricing-suggestion", 20, "10 s");
+  if (limited) return limited;
+
   const productId = req.nextUrl.searchParams.get("productId");
   if (!productId) return NextResponse.json({ error: "productId required" }, { status: 400 });
 
