@@ -15,6 +15,7 @@ trend detection, bidding, and PAN-India delivery tracking.
 - **Auth:** Auth.js (NextAuth v5) — email/password + optional Google OAuth, role-based access
 - **Data fetching:** React Server Components + TanStack Query for client interactivity (search, cart)
 - **File uploads:** `UploadAdapter` interface — Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set, local disk otherwise (dev only)
+- **Rate limiting:** Upstash Redis + `@upstash/ratelimit`, per-IP on login, signup, search, pricing suggestions, bidding, and uploads (no-op until Upstash env vars are set)
 - **Validation:** Zod
 
 ## Getting Started
@@ -45,6 +46,7 @@ cp .env.example .env
 | `NEXTAUTH_URL` | App URL, e.g. `http://localhost:3000` |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Optional — leave blank to disable Google sign-in |
 | `BLOB_READ_WRITE_TOKEN` | Optional — leave blank to fall back to local-disk uploads in dev; set automatically when a Blob store is connected on Vercel |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional — leave blank to disable rate limiting in dev; set via the Vercel Storage tab or Upstash console to throttle login/signup/search/bid/upload endpoints per IP |
 
 ### 4. Set up the database
 
@@ -115,12 +117,29 @@ prisma/
 - **Authentication workflow:** every listing starts `PENDING_AUTH` → reviewed in the admin queue with
   inspection photos → `APPROVED` (mock certificate hash + QR generated) or `REJECTED` (reason required).
 - **Insurance:** opt-in, recommended by default for items ≥ ₹10,000, cost bundled into checkout total.
+- **Checkout concurrency:** order creation runs in a single DB transaction, and each listing flips
+  `ACTIVE` → `SOLD` via a conditional update — so two buyers checking out the same listing at once
+  can't both win it.
+- **Bidding concurrency:** the top-bid check and the write happen inside one Serializable-isolation
+  transaction, so two bids racing to beat the same top bid can't both succeed.
 
 ## Testing
 
 ```bash
 npm run test
 ```
+
+Covers business logic (trend score, pricing suggestion, seller tiers), auth validation schemas, and
+the checkout/bidding server actions (commission math, insurance rules, concurrency-conflict handling).
+
+## Security
+
+- **Rate limiting:** per-IP throttling (via Upstash) on login, signup, bidding, search, pricing
+  suggestions, and uploads.
+- **Upload validation:** files are sniffed by magic bytes, not just the client-supplied MIME type,
+  before being written to storage.
+- **Authorization:** every mutating server action re-checks role/ownership against the database — the
+  role-gated middleware on `/dashboard/*` and `/sell` is a UX redirect, not the security boundary.
 
 ## Notes
 
