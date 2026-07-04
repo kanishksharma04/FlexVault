@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const limited = await rateLimit(req, "search", 20, "10 s");
   if (limited) return limited;
 
-  const q = req.nextUrl.searchParams.get("q")?.trim() ?? "";
+  const q = (req.nextUrl.searchParams.get("q")?.trim() ?? "").slice(0, 100);
   const category = req.nextUrl.searchParams.get("category")?.trim() || undefined;
   if (q.length < 2) return NextResponse.json({ results: [] });
 
