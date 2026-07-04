@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { rateLimitAction } from "@/lib/rate-limit";
 import { SELLER_TIER_COMMISSION, INSURANCE_THRESHOLD_INR, INSURANCE_RATE, PRO_MEMBERSHIP_COMMISSION_DISCOUNT } from "@/lib/business/constants";
 
 export type CheckoutState = {
@@ -16,6 +17,9 @@ class ListingUnavailableError extends Error {}
 export async function submitOrder(_prev: CheckoutState, formData: FormData): Promise<CheckoutState> {
   const session = await auth();
   if (!session?.user) return { error: "You must be logged in to check out." };
+
+  const limitError = await rateLimitAction("checkout", 5, "1 m");
+  if (limitError) return { error: limitError };
 
   const listingIds = formData.getAll("listingId").map(String);
   if (listingIds.length === 0) return { error: "Your cart is empty." };
