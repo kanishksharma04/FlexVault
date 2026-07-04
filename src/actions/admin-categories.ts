@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import type { CategoryPhase } from "@prisma/client";
+import { CategoryPhase } from "@prisma/client";
 
 async function assertAdmin() {
   const session = await auth();
@@ -21,9 +21,13 @@ export async function createCategory(_prev: CategoryFormState, formData: FormDat
   if (!(await assertAdmin())) return { error: "Not authorized." };
 
   const name = String(formData.get("name") ?? "").trim();
-  const phase = String(formData.get("phase") ?? "PHASE_1") as CategoryPhase;
+  const phaseInput = String(formData.get("phase") ?? "PHASE_1");
   const parentId = String(formData.get("parentId") ?? "") || null;
   if (!name) return { error: "Name is required." };
+  if (!(Object.values(CategoryPhase) as string[]).includes(phaseInput)) {
+    return { error: "Select a valid phase." };
+  }
+  const phase = phaseInput as CategoryPhase;
 
   const slug = slugify(name);
   const existing = await db.category.findUnique({ where: { slug } });
