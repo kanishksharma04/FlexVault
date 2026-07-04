@@ -18,6 +18,13 @@ export async function updateListing(listingId: string, data: { price?: number; q
   const { listing } = await assertOwnsListing(listingId);
   if (!listing) return { error: "Not authorized to edit this listing." };
 
+  if (data.price !== undefined && (!Number.isFinite(data.price) || data.price <= 0)) {
+    return { error: "Enter a valid price." };
+  }
+  if (data.quantity !== undefined && (!Number.isFinite(data.quantity) || data.quantity <= 0)) {
+    return { error: "Enter a valid quantity." };
+  }
+
   await db.listing.update({ where: { id: listingId }, data });
   revalidatePath("/dashboard/seller/listings");
   return { success: true };
