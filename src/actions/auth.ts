@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { signupSchema } from "@/lib/validations/auth";
 import { rateLimitAction } from "@/lib/rate-limit";
@@ -33,14 +34,21 @@ export async function registerUser(_prevState: SignupState, formData: FormData):
   }
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
-  await db.user.create({
-    data: {
-      name: parsed.data.name,
-      email: parsed.data.email,
-      passwordHash,
-      role: parsed.data.role,
-    },
-  });
+  try {
+    await db.user.create({
+      data: {
+        name: parsed.data.name,
+        email: parsed.data.email,
+        passwordHash,
+        role: parsed.data.role,
+      },
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return { formError: "An account with this email already exists." };
+    }
+    throw err;
+  }
 
   return { success: true };
 }
