@@ -48,7 +48,7 @@ export async function createListing(_prev: CreateListingState, formData: FormDat
       sellerId: session.user.id,
       productId,
       price,
-      quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+      quantity: Number.isFinite(quantity) && quantity > 0 && quantity <= 999 ? quantity : 1,
       condition,
       listingType,
       size,
