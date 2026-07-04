@@ -113,6 +113,10 @@ export function CheckoutWizard() {
         toast.error("Enter a valid 6-digit pincode.");
         return;
       }
+      if (!/^[6-9]\d{9}$/.test(address.phone)) {
+        toast.error("Enter a valid 10-digit phone number.");
+        return;
+      }
     }
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   }
