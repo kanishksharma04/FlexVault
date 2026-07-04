@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import type { Role, SellerTier } from "@prisma/client";
+import { Role, SellerTier } from "@prisma/client";
 
 async function assertAdmin() {
   const session = await auth();
@@ -14,6 +14,12 @@ async function assertAdmin() {
 export async function updateUser(id: string, data: { role?: Role; sellerTier?: SellerTier; isProMember?: boolean }) {
   const session = await assertAdmin();
   if (!session) return { error: "Not authorized." };
+  if (data.role && !(Object.values(Role) as string[]).includes(data.role)) {
+    return { error: "Invalid role." };
+  }
+  if (data.sellerTier && !(Object.values(SellerTier) as string[]).includes(data.sellerTier)) {
+    return { error: "Invalid seller tier." };
+  }
   if (session.user.id === id && data.role && data.role !== "ADMIN") {
     return { error: "You cannot remove your own admin role." };
   }
