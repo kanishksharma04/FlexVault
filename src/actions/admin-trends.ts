@@ -17,6 +17,10 @@ export async function updateTrendWeights(formData: FormData) {
   const sentimentWeight = Number(formData.get("sentimentWeight"));
   const engagementWeight = Number(formData.get("engagementWeight"));
 
+  if (![mentionVelocityWeight, sentimentWeight, engagementWeight].every(Number.isFinite)) {
+    return { error: "Enter valid numeric weights." };
+  }
+
   const existing = await db.trendWeightConfig.findFirst();
   if (existing) {
     await db.trendWeightConfig.update({
