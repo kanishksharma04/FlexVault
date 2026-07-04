@@ -12,7 +12,11 @@ async function assertAdmin() {
 }
 
 export async function updateUser(id: string, data: { role?: Role; sellerTier?: SellerTier; isProMember?: boolean }) {
-  if (!(await assertAdmin())) return { error: "Not authorized." };
+  const session = await assertAdmin();
+  if (!session) return { error: "Not authorized." };
+  if (session.user.id === id && data.role && data.role !== "ADMIN") {
+    return { error: "You cannot remove your own admin role." };
+  }
   await db.user.update({ where: { id }, data });
   revalidatePath("/dashboard/admin/users");
   return { success: true };
