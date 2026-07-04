@@ -38,6 +38,10 @@ export async function updateTrendWeights(formData: FormData) {
 export async function overrideTrendScore(productId: string, score: number, reasonSummary: string) {
   if (!(await assertAdmin())) return { error: "Not authorized." };
 
+  if (!Number.isFinite(score) || score < 0 || score > 100) {
+    return { error: "Score must be a number between 0 and 100." };
+  }
+
   await db.trendScore.create({
     data: {
       productId,
