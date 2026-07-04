@@ -27,6 +27,7 @@ export async function createDrop(_prev: DropFormState, formData: FormData): Prom
   if (!title || !dropDate) return { error: "Title and drop date are required." };
 
   const target = new Date(dropDate);
+  if (Number.isNaN(target.getTime())) return { error: "Enter a valid drop date." };
   await db.drop.create({
     data: {
       title,
