@@ -33,6 +33,12 @@ export async function submitOrder(_prev: CheckoutState, formData: FormData): Pro
   if (!fullName || !line1 || !city || !state || !pincode || !phone) {
     return { error: "Fill in all required shipping fields." };
   }
+  if (!/^\d{6}$/.test(pincode)) {
+    return { error: "Enter a valid 6-digit pincode." };
+  }
+  if (!/^[6-9]\d{9}$/.test(phone)) {
+    return { error: "Enter a valid 10-digit phone number." };
+  }
 
   const listings = await db.listing.findMany({
     where: { id: { in: listingIds }, status: "ACTIVE" },
