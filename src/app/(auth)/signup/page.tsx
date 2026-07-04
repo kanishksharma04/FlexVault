@@ -63,17 +63,17 @@ export default function SignupPage() {
         <input type="hidden" name="role" value={role} />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Full name</Label>
-          <Input id="name" name="name" required autoComplete="name" />
+          <Input id="name" name="name" required autoComplete="name" maxLength={100} />
           {state.errors?.name && <p className="text-xs text-hype">{state.errors.name[0]}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" required autoComplete="email" />
+          <Input id="email" name="email" type="email" required autoComplete="email" maxLength={254} />
           {state.errors?.email && <p className="text-xs text-hype">{state.errors.email[0]}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" required autoComplete="new-password" />
+          <Input id="password" name="password" type="password" required autoComplete="new-password" maxLength={72} />
           {state.errors?.password && <p className="text-xs text-hype">{state.errors.password[0]}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
