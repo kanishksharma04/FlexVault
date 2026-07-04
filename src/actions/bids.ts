@@ -42,6 +42,9 @@ export async function placeBid(_prev: PlaceBidState, formData: FormData): Promis
         if (!listing || listing.listingType !== "AUCTION" || listing.status !== "ACTIVE") {
           return { error: "This auction is no longer active." };
         }
+        if (listing.sellerId === session.user.id) {
+          return { error: "You cannot bid on your own listing." };
+        }
         if (listing.auctionEndsAt && listing.auctionEndsAt < new Date()) {
           return { error: "This auction has ended." };
         }
