@@ -28,6 +28,11 @@ function toArray(v: string | string[] | undefined): string[] {
   return Array.isArray(v) ? v : [v];
 }
 
+function toPositiveNumber(v: string | string[] | undefined): number | undefined {
+  const n = Number(Array.isArray(v) ? v[0] : v);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
 function pageHref(sp: Record<string, string | string[] | undefined>, page: number): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(sp)) {
@@ -50,10 +55,10 @@ export default async function BrowseCategoryPage({ params, searchParams }: Props
     brands: toArray(sp.brand),
     sizes: toArray(sp.size),
     conditions: toArray(sp.condition) as Condition[],
-    minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
-    maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
+    minPrice: toPositiveNumber(sp.minPrice),
+    maxPrice: toPositiveNumber(sp.maxPrice),
     sort: (sp.sort as "trending" | "price_asc" | "price_desc" | "newest") ?? "trending",
-    page: sp.page ? Number(sp.page) : 1,
+    page: toPositiveNumber(sp.page) ?? 1,
   };
 
   const [{ products, total, page, pageCount }, facets] = await Promise.all([
