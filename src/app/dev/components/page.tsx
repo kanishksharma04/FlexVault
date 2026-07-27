@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,10 @@ import { HazardDivider } from "@/components/vault/hazard-divider";
 import { ProductCard, type ProductCardData } from "@/components/vault/product-card";
 
 export default async function ComponentShowcasePage() {
+  // Internal design-system sandbox — not linked from any nav, but without this
+  // it would still be publicly reachable by URL in production.
+  if (process.env.NODE_ENV === "production") notFound();
+
   // Fixed offset computed once per server render — fine for this internal
   // sanity-check page, which isn't re-rendered client-side.
   // eslint-disable-next-line react-hooks/purity
