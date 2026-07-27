@@ -1,15 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { assertAdmin } from "@/lib/auth-guards";
 import type { OrderStatus, Prisma } from "@prisma/client";
-
-async function assertAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") return null;
-  return session;
-}
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   if (!(await assertAdmin())) return { error: "Not authorized." };

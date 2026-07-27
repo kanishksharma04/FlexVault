@@ -1,19 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { assertAdmin } from "@/lib/auth-guards";
+import { slugify } from "@/lib/slugify";
 import { mockProductImages } from "@/lib/mock-image";
-
-async function assertAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") return null;
-  return session;
-}
-
-function slugify(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
 
 export type BlogFormState = { error?: string; success?: boolean };
 

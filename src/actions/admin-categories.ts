@@ -1,19 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { assertAdmin } from "@/lib/auth-guards";
+import { slugify } from "@/lib/slugify";
 import { CategoryPhase } from "@prisma/client";
-
-async function assertAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") return null;
-  return session;
-}
-
-function slugify(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
 
 export type CategoryFormState = { error?: string; success?: boolean };
 

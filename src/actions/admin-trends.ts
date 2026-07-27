@@ -1,14 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-
-async function assertAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") return null;
-  return session;
-}
+import { assertAdmin } from "@/lib/auth-guards";
 
 export async function updateTrendWeights(formData: FormData) {
   if (!(await assertAdmin())) return { error: "Not authorized." };
