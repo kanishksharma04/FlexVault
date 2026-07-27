@@ -10,7 +10,12 @@ export interface UploadAdapter {
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 function randomFilename(file: File) {
-  const ext = file.name.split(".").pop() || "jpg";
+  // Only keep a short alphanumeric extension from the client-supplied name —
+  // it can contain path separators (e.g. "a.jpg/../../../etc/passwd"), which
+  // would otherwise let path.join() escape UPLOAD_DIR and write anywhere on
+  // disk the process has access to.
+  const rawExt = file.name.split(".").pop() || "";
+  const ext = /^[a-zA-Z0-9]{1,5}$/.test(rawExt) ? rawExt : "jpg";
   return `${randomUUID()}.${ext}`;
 }
 
