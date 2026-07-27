@@ -16,6 +16,10 @@ export default async function AdminUsersPage({ searchParams }: Props) {
     },
     orderBy: { createdAt: "desc" },
     take: 50,
+    // Select only what UsersTable (a Client Component) needs — it's a plain
+    // findMany otherwise, and every field including passwordHash would be
+    // serialized into the RSC payload sent to the admin's browser.
+    select: { id: true, name: true, email: true, role: true, sellerTier: true, isProMember: true },
   });
 
   return (
