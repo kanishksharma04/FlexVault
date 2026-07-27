@@ -21,11 +21,24 @@ export async function updateListing(listingId: string, data: { price?: number; q
   if (data.price !== undefined && (!Number.isFinite(data.price) || data.price <= 0)) {
     return { error: "Enter a valid price." };
   }
-  if (data.quantity !== undefined && (!Number.isFinite(data.quantity) || data.quantity <= 0)) {
+  if (
+    data.quantity !== undefined &&
+    (!Number.isFinite(data.quantity) || data.quantity <= 0 || data.quantity > 999)
+  ) {
     return { error: "Enter a valid quantity." };
   }
 
-  await db.listing.update({ where: { id: listingId }, data });
+  // Build the update payload field-by-field rather than forwarding `data`
+  // as-is — Prisma only rejects unknown keys, not extra *valid* Listing
+  // fields (e.g. status, sellerId), so passing the caller's object through
+  // directly would let a crafted call smuggle in fields beyond price/quantity.
+  await db.listing.update({
+    where: { id: listingId },
+    data: {
+      ...(data.price !== undefined ? { price: data.price } : {}),
+      ...(data.quantity !== undefined ? { quantity: data.quantity } : {}),
+    },
+  });
   revalidatePath("/dashboard/seller/listings");
   return { success: true };
 }
