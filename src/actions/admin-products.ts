@@ -47,7 +47,25 @@ export async function createProduct(_prev: ProductFormState, formData: FormData)
 
 export async function updateProduct(id: string, data: { name?: string; brand?: string; baseTrendScore?: number; description?: string }) {
   if (!(await assertAdmin())) return { error: "Not authorized." };
-  await db.product.update({ where: { id }, data });
+
+  if (data.name !== undefined && !data.name.trim()) return { error: "Name cannot be empty." };
+  if (data.brand !== undefined && !data.brand.trim()) return { error: "Brand cannot be empty." };
+  if (data.baseTrendScore !== undefined && !Number.isFinite(data.baseTrendScore)) {
+    return { error: "Enter a valid trend score." };
+  }
+
+  // Whitelist fields explicitly instead of forwarding `data` as-is — Prisma
+  // only rejects unknown keys, not extra *valid* Product fields (e.g. slug,
+  // sku, categoryId), so a crafted call could otherwise smuggle those in.
+  await db.product.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+      ...(data.brand !== undefined ? { brand: data.brand.trim() } : {}),
+      ...(data.baseTrendScore !== undefined ? { baseTrendScore: data.baseTrendScore } : {}),
+      ...(data.description !== undefined ? { description: data.description } : {}),
+    },
+  });
   revalidatePath("/dashboard/admin/products");
   return { success: true };
 }
