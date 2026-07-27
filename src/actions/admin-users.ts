@@ -23,7 +23,17 @@ export async function updateUser(id: string, data: { role?: Role; sellerTier?: S
   if (session.user.id === id && data.role && data.role !== "ADMIN") {
     return { error: "You cannot remove your own admin role." };
   }
-  await db.user.update({ where: { id }, data });
+  // Whitelist fields explicitly instead of forwarding `data` as-is — Prisma
+  // only rejects unknown keys, not extra *valid* User fields (e.g.
+  // passwordHash, email), so a crafted call could otherwise smuggle those in.
+  await db.user.update({
+    where: { id },
+    data: {
+      ...(data.role !== undefined ? { role: data.role } : {}),
+      ...(data.sellerTier !== undefined ? { sellerTier: data.sellerTier } : {}),
+      ...(data.isProMember !== undefined ? { isProMember: data.isProMember } : {}),
+    },
+  });
   revalidatePath("/dashboard/admin/users");
   return { success: true };
 }
