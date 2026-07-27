@@ -40,7 +40,22 @@ export async function createCategory(_prev: CategoryFormState, formData: FormDat
 
 export async function updateCategory(id: string, data: { name?: string; phase?: CategoryPhase }) {
   if (!(await assertAdmin())) return { error: "Not authorized." };
-  await db.category.update({ where: { id }, data });
+
+  if (data.name !== undefined && !data.name.trim()) return { error: "Name cannot be empty." };
+  if (data.phase !== undefined && !(Object.values(CategoryPhase) as string[]).includes(data.phase)) {
+    return { error: "Select a valid phase." };
+  }
+
+  // Whitelist fields explicitly instead of forwarding `data` as-is — Prisma
+  // only rejects unknown keys, not extra *valid* Category fields (e.g. slug,
+  // parentId), so a crafted call could otherwise smuggle those in.
+  await db.category.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+      ...(data.phase !== undefined ? { phase: data.phase } : {}),
+    },
+  });
   revalidatePath("/dashboard/admin/categories");
   return { success: true };
 }
