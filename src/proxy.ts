@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import { authConfig } from "@/lib/auth.config";
 
 // Edge-safe auth instance — built only from the lightweight config so this
-// middleware's bundle doesn't pull in Prisma Client / bcryptjs (see auth.config.ts).
+// proxy's bundle doesn't pull in Prisma Client / bcryptjs (see auth.config.ts).
 const { auth } = NextAuth(authConfig);
 
 const ROLE_PREFIXES: { prefix: string; roles: string[] }[] = [

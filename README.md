@@ -139,7 +139,7 @@ the checkout/bidding server actions (commission math, insurance rules, concurren
 - **Upload validation:** files are sniffed by magic bytes, not just the client-supplied MIME type,
   before being written to storage.
 - **Authorization:** every mutating server action re-checks role/ownership against the database — the
-  role-gated middleware on `/dashboard/*` and `/sell` is a UX redirect, not the security boundary.
+  role-gated proxy (`src/proxy.ts`) on `/dashboard/*` and `/sell` is a UX redirect, not the security boundary.
 
 ## Notes
 
