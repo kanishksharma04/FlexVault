@@ -2,9 +2,10 @@
 
 **Drip. Verified. Delivered.**
 
-India's authenticated marketplace for hype culture — sneakers, streetwear, diecast collectibles,
-watches, and accessories — built as a full-stack Next.js app with real multi-layer authentication,
-trend detection, bidding, and PAN-India delivery tracking.
+Flex Vault is India's authenticated marketplace for hype culture — sneakers, streetwear, diecast
+collectibles, watches, and accessories. It's a full-stack web app where every item is checked by a
+human before it's allowed to sell, sellers earn better rates the more they sell, and prices are
+guided by how "trending" an item currently is.
 
 [![CI](https://github.com/kanishksharma04/FlexVault/actions/workflows/ci.yml/badge.svg)](https://github.com/kanishksharma04/FlexVault/actions/workflows/ci.yml)
 
@@ -14,7 +15,7 @@ trend detection, bidding, and PAN-India delivery tracking.
 
 - [Overview](#overview)
 - [Core Features](#core-features)
-- [Architecture](#architecture)
+- [How It's Built (Architecture)](#how-its-built-architecture)
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -24,6 +25,7 @@ trend detection, bidding, and PAN-India delivery tracking.
 - [Authentication Flow](#authentication-flow)
 - [API Routes](#api-routes)
 - [Business Logic](#business-logic)
+- [SEO](#seo)
 - [Testing](#testing)
 - [Security](#security)
 - [Deployment](#deployment)
@@ -40,126 +42,144 @@ trend detection, bidding, and PAN-India delivery tracking.
 
 ## Overview
 
-Flex Vault is a demo full-stack marketplace that simulates the operational model of authenticated
-resale platforms (StockX, Grailed, Chrono24): every listing passes through a human authentication
-queue before it goes live, sellers are ranked into commission tiers, and pricing is guided by a live
-trend score computed from mention velocity, sentiment, and engagement signals.
+Think of platforms like StockX, Grailed, or Chrono24 — marketplaces where every item is inspected
+and verified before it's sold, so buyers can trust what they're getting. Flex Vault simulates that
+same model, but for the Indian market: every listing goes through a human "authentication queue"
+before it goes live, sellers move up commission tiers the more they sell, and prices are guided by
+a live "trend score" that tracks how much buzz an item is currently getting.
 
-It is built entirely on the Next.js App Router with Server Actions as the primary mutation layer —
-there is no separate REST/GraphQL backend. Four roles (`BUYER`, `SELLER`, `ADMIN`, `AUTHENTICATOR`)
-share one codebase, gated by role-aware dashboards and server-side authorization checks.
+It's built as a single Next.js application — there's no separate backend server or API to keep in
+sync. All the logic for reading and writing data lives in the same codebase as the pages themselves.
+Four types of users share this one app: **buyers**, **sellers**, **admins**, and
+**authenticators** (the people who inspect and approve listings). Each role sees a different
+dashboard, and the server checks every request to make sure a user is only allowed to see or change
+what their role permits.
 
 ## Core Features
 
 | Area | What it does |
 |---|---|
-| **Catalog & browse** | Filterable, sortable, paginated product browsing by category, brand, size, condition, price, and trend score |
-| **Product detail** | Image gallery, all active listings for a product, live trend gauge, authentication certificate preview, related items |
-| **Checkout** | 3-step wizard (shipping → payment → review) with server-side price/commission/insurance calculation and transactional, race-safe listing claims |
-| **Selling** | 6-step listing flow with an AI-style price suggestion (recent comps + trend score) and photo upload with server-side image validation |
-| **Bidding** | Live auctions with Serializable-transaction bid placement so two concurrent bids can't both "win" |
-| **Authentication queue** | Every listing starts `PENDING_AUTH`; admins/authenticators approve (issuing a certificate hash + QR) or reject with a required reason |
-| **Seller tiers & Pro membership** | Bronze → Platinum tiers with decreasing commission and faster payouts; a Pro membership stacks an additional discount |
-| **Trend intelligence** | Configurable weighted trend score, a public "Hype Feed" of trending products, and an admin override tool |
-| **Dashboards** | Role-specific dashboards for buyers (orders, Digital Vault, watchlist, bids), sellers (listings, sales, payouts), and admins (full CRUD + authentication hub) |
-| **Editorial** | A lightweight blog/CMS for admin-authored articles |
+| **Browse & search** | Filter and sort products by category, brand, size, condition, price, or trend score |
+| **Product page** | Photo gallery, every active listing for that product, a live "trend" gauge, a preview of the authentication certificate, and similar items |
+| **Cart & checkout** | Add multiple listings to a cart (saved in your browser), then check out in a 3-step flow (shipping → payment → review). Prices, commission, and insurance are all recalculated on the server so nothing can be tampered with from the browser |
+| **Selling** | A 6-step guided flow for listing an item, with an automatic price suggestion (based on recent sales and current trend) and photo upload with server-side checks that the files are really images |
+| **Bidding** | Live auctions. The database guarantees two people can't both "win" the same bid at the same instant |
+| **Authentication queue** | Every new listing starts as "pending" until an admin or authenticator reviews it — approving it (which issues a certificate + QR code) or rejecting it with a reason |
+| **Seller tiers & Pro membership** | Sellers move from Bronze to Platinum as they sell more, unlocking lower fees and faster payouts. A paid "Pro" membership adds an extra discount on top |
+| **Trend intelligence** | A configurable formula scores how "hot" each product is right now, shown across the site and in a public "Hype Feed" |
+| **Dashboards** | A different dashboard for each role — buyers see orders/wishlist/bids, sellers see their listings/sales/payouts, admins see everything plus the authentication queue |
+| **Editorial** | A simple blog that admins can write and publish articles to |
+| **Light & dark mode** | A theme toggle in the header (and mobile menu) switches the whole site between a light and a dark color scheme. Your choice is remembered on your next visit |
 
-## Architecture
+## How It's Built (Architecture)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Next.js App Router                          │
 │                                                                    │
-│  Server Components (RSC)  ──►  Prisma  ──►  PostgreSQL             │
+│  Server Components  ──►  Prisma (database toolkit)  ──►  PostgreSQL │
 │         │                                                          │
 │         ├──  Server Actions  ──►  Prisma  ──►  PostgreSQL          │
-│         │        (all writes: checkout, bids, admin CRUD, auth)    │
+│         │        (every write: checkout, bids, admin edits, etc.)  │
 │         │                                                          │
-│         └──  Route Handlers (/api/*)  ──►  Prisma / Upstash        │
-│                  (search, pricing suggestion, uploads)              │
+│         └──  API routes (/api/*)  ──►  Prisma / Upstash            │
+│                  (search, price suggestions, file uploads)          │
 │                                                                     │
-│  src/proxy.ts  ──►  optimistic role-gate redirect (UX only)        │
-│  Auth.js (JWT sessions)  ──►  Prisma adapter                       │
+│  src/proxy.ts  ──►  quick "are you allowed here?" redirect (UX only)│
+│  Auth.js (login sessions)  ──►  Prisma                             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-There is no client-side data-mutation library (no Redux/Zustand mutations, no REST client for
-writes) — forms post directly to Server Actions via `useActionState`/`useTransition`, and
-TanStack Query is used only for a handful of client-driven reads (live search, the price-suggestion
-poll, the product picker).
+A quick explanation of the unusual terms above:
 
-**Defense in depth:** the role-gated proxy on `/dashboard/*`, `/sell`, and `/checkout` is a UX
-redirect, not the security boundary — every mutating Server Action independently re-checks the
-caller's role and resource ownership against the database before touching data.
+- **Server Component** — a React component that runs on the server and never sends its code to the
+  browser. It's how most pages fetch and display data.
+- **Server Action** — a regular-looking function that actually runs on the server, not in the
+  browser. Forms call these directly to save data, instead of the app talking to a separate API.
+
+There's no separate system for saving data on the client side (no Redux, no calls to a REST API for
+writes). Forms call Server Actions directly. The only place the app fetches data from the client
+side is for things that need to feel instant while typing — live search, price suggestions while
+listing an item, and a product picker.
+
+**Why the security check happens twice:** the app blocks access to `/dashboard/*`, `/sell`, and
+`/checkout` for the wrong role right at the door (in `src/proxy.ts`), which makes the UI feel
+correct immediately. But that check alone isn't trusted for security — every Server Action that
+changes data independently re-checks, against the database, that the person making the request is
+actually allowed to.
 
 ## Technology Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js 16 (App Router, TypeScript, Server Actions, Turbopack) |
-| UI | Tailwind CSS v4 + hand-authored Radix UI primitives ("Vault Streetwear" design system) |
-| Animation | Framer Motion (respects `prefers-reduced-motion` globally via `MotionConfig`) |
-| Database | PostgreSQL via Prisma ORM 6 |
-| Auth | Auth.js (NextAuth v5) — credentials (bcrypt) + optional Google OAuth, JWT sessions, role-based access |
-| Client data fetching | React Server Components for reads; TanStack Query for a small set of client-driven reads |
-| File uploads | `UploadAdapter` interface — Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set, local disk otherwise (dev only) |
-| Rate limiting | Upstash Redis + `@upstash/ratelimit`, per-IP, no-op until Upstash env vars are set |
-| Validation | Zod (auth forms) + explicit server-side checks in every Server Action |
-| Testing | Vitest + Testing Library (jsdom) |
-| CI | GitHub Actions — typecheck, lint, test, build on every push/PR to `main` |
+| Layer | Choice | In plain terms |
+|---|---|---|
+| Framework | Next.js 16 (App Router, TypeScript, Turbopack) | The framework that runs both the pages and the server logic |
+| UI | Tailwind CSS v4 + hand-built Radix UI components ("Vault Streetwear" design system) | Styling utility classes + accessible, unstyled building blocks (dropdowns, dialogs, etc.) that we skin ourselves |
+| Animation | Framer Motion | Powers the site's motion — automatically turns off for people who've asked their OS to reduce motion |
+| Database | PostgreSQL via Prisma ORM | Prisma is a toolkit that lets us write database queries as typed JavaScript instead of raw SQL |
+| Login/accounts | Auth.js (NextAuth v5) | Email+password login (with Google sign-in as an option), sessions stored as signed tokens |
+| Client-side data fetching | TanStack Query, used sparingly | For the handful of things that need live updates without a full page reload |
+| File uploads | A small "storage adapter" — uses Vercel Blob if configured, otherwise saves to local disk in development | So uploads work out of the box locally, without needing a cloud account |
+| Rate limiting | Upstash Redis | Slows down repeated requests (login attempts, searches, etc.) from the same IP address. Does nothing if not configured |
+| Validation | Zod, plus manual checks in every Server Action | Zod checks that form data is shaped correctly before it's used |
+| Testing | Vitest + Testing Library | Runs the automated test suite |
+| CI | GitHub Actions | Automatically type-checks, lints, tests, and builds the app on every push/PR to `main` |
 
 ## Project Structure
 
 ```
 src/
-  actions/            Server actions — the app's only write path
-    admin-*.ts         Admin CRUD (users, products, categories, listings, orders, drops, trends, blog)
-    auth.ts            Signup
-    authentication.ts  Authentication-queue review (approve/reject a listing)
-    bids.ts            Auction bidding
-    checkout.ts        Order placement
-    create-listing.ts  Seller listing creation
-    listings.ts        Seller listing edit/archive
-    membership.ts       Pro membership upgrade
-    watchlist.ts        Watchlist toggle
-  app/                 App Router routes
-    (auth)/             Login, signup, forgot password
-    browse/[category]/  Filterable/sortable/paginated catalog
-    product/[slug]/     PDP — gallery, listings, trend gauge, certificate, related items
-    checkout/           3-step wizard with animated confirmation
-    sell/                6-step seller listing flow
+  actions/            Server Actions — every write to the database goes through here
+    admin-*.ts         Admin tools (managing users, products, categories, listings, orders, drops, trends, blog)
+    auth.ts            Sign-up
+    authentication.ts  Reviewing a listing in the authentication queue (approve/reject)
+    bids.ts            Placing auction bids
+    checkout.ts        Placing an order
+    create-listing.ts  Creating a new listing as a seller
+    listings.ts        Editing or archiving a seller's existing listing
+    membership.ts       Upgrading to Pro membership
+    watchlist.ts        Adding/removing an item from your watchlist
+  app/                 Every page and route, following Next.js's folder-based routing
+    (auth)/             Login, sign-up, forgot password
+    browse/[category]/  The filterable, sortable product catalog
+    product/[slug]/     A single product's page — photos, listings, trend gauge, certificate, related items
+    checkout/           The cart checkout flow
+    sell/                The step-by-step "list an item" flow
     dashboard/
-      buyer/             Orders, Digital Vault, watchlist, active bids
-      seller/             Listings CRUD, sales, payouts, tier progress, Pro upsell
-      admin/               Auth queue, full CRUD, trend weight config, editorial CRUD
-    trend/                Public live Hype Feed
-    blog/                 Public editorial pages
-    api/                  Route handlers (auth, search, pricing-suggestion, uploads)
-  components/           UI primitives, landing sections, dashboard/admin/sell/checkout components
+      buyer/             Orders, saved items ("Digital Vault"), watchlist, active bids
+      seller/             Listings, sales, payouts, tier progress, Pro upsell
+      admin/               Authentication queue, full admin tools, trend settings, blog editing
+    trend/                The public "Hype Feed" of trending items
+    blog/                 Public blog pages
+    api/                  A few routes for things that need a plain HTTP endpoint (search, uploads, etc.)
+  components/           Every reusable UI piece — buttons, cards, dashboard widgets, and so on
   lib/
-    business/            Trend score formula, pricing suggestion, commission tiers, certificate hashing
-    queries/              Server-side Prisma query helpers, grouped by dashboard/area
-    validations/           Zod schemas
-    auth.ts, auth.config.ts  Auth.js setup (config split for Edge-safe proxy bundling)
-    auth-guards.ts        Shared server-action authorization helpers
-    db.ts                 Prisma client singleton
-    rate-limit.ts          Upstash-backed per-IP rate limiting
-    uploads.ts             Upload storage adapter (Vercel Blob / local disk)
-    file-signature.ts       Magic-byte image type sniffing
-  proxy.ts              Optimistic role-gate redirect (Next.js 16 Proxy convention)
+    business/            The actual formulas — trend score, price suggestions, commission tiers, certificate hashing
+    queries/              Reusable database queries, grouped by which dashboard/page uses them
+    validations/           Zod schemas (the rules that check form input is valid)
+    auth.ts, auth.config.ts  Login setup (split into two files — explained in Authentication Flow below)
+    auth-guards.ts        Shared "is this user allowed to do this?" helper functions
+    db.ts                 The single shared database connection
+    rate-limit.ts          The Upstash-based rate limiter
+    uploads.ts             Picks where uploaded files get saved (cloud storage or local disk)
+    file-signature.ts       Checks that an uploaded file really is an image, not just labeled as one
+    theme.ts                Small helper that flips the site between light and dark mode
+  hooks/
+    use-theme.ts           Reads the current light/dark theme so components can react to it
+  proxy.ts              The "are you allowed on this page?" redirect mentioned above
 prisma/
-  schema.prisma          Full data model (17 models, 10 enums)
-  seed.ts                 Deterministic-ish demo data generator
-  migrations/              SQL migration history
-scripts/                 One-off/maintenance data scripts (category backfills, orphan-listing fixes)
+  schema.prisma          The full database design (17 tables, 10 enums/categories)
+  seed.ts                 Fills the database with realistic demo data
+  migrations/              The history of database schema changes
+scripts/                 One-off maintenance scripts (fixing data, backfills, etc.)
 ```
 
 ## Getting Started
 
-### Prerequisites
+### What you need first
 
-- Node.js 20 or later (CI runs on Node 22)
-- A reachable PostgreSQL instance (local or hosted)
+- Node.js 20 or newer (the CI pipeline uses Node 22)
+- A PostgreSQL database you can connect to (local or hosted — a free one from
+  [Neon](https://neon.tech) or [Supabase](https://supabase.com) works fine)
 
 ### 1. Install dependencies
 
@@ -167,125 +187,147 @@ scripts/                 One-off/maintenance data scripts (category backfills, o
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Set up your environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-See [Environment Variables](#environment-variables) below for what each value does.
+Then open `.env` and fill in the values. See [Environment Variables](#environment-variables) below
+for what each one is for.
 
 ### 3. Set up the database
 
 ```bash
-npx prisma migrate dev   # creates the schema
-npm run db:seed          # seeds ~60 products, 190+ listings, users, orders, trend history, a blog, and a drop
+npx prisma migrate dev   # creates all the tables
+npm run db:seed          # fills them with demo data — ~60 products, 190+ listings, users, orders, and more
 ```
 
-### 4. Run the dev server
+### 4. Start the app
 
 ```bash
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000).
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Environment Variables
 
-| Variable | Required | Description |
+| Variable | Do you need it? | What it's for |
 |---|---|---|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `AUTH_SECRET` | Yes | Random secret for Auth.js — generate with `npx auth secret` |
-| `NEXTAUTH_URL` | Yes | App URL, e.g. `http://localhost:3000` |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | No | Leave blank to disable Google sign-in |
-| `BLOB_READ_WRITE_TOKEN` | No | Leave blank to fall back to local-disk uploads in dev; set automatically when a Blob store is connected on Vercel |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | No | Leave blank to disable rate limiting in dev; set via the Vercel Storage tab or Upstash console to throttle login/signup/search/bid/upload endpoints per IP |
+| `DATABASE_URL` | Yes | The connection string for your PostgreSQL database |
+| `AUTH_SECRET` | Yes | A random secret used to sign login sessions — generate one with `npx auth secret` |
+| `NEXTAUTH_URL` | Yes | The URL your app runs at, e.g. `http://localhost:3000` |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | No | Leave blank and the "Sign in with Google" button just won't show up |
+| `BLOB_READ_WRITE_TOKEN` | No | Leave blank and file uploads save to your local disk instead. Vercel sets this automatically if you connect a Blob store |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | No | Leave blank and rate limiting is simply skipped. Set these (via Vercel's Storage tab or the Upstash console) to throttle repeated login/search/bid/upload requests |
 
-All variables are documented in [`.env.example`](.env.example). The app is designed to run with only
-`DATABASE_URL`, `AUTH_SECRET`, and `NEXTAUTH_URL` set — every optional integration degrades
-gracefully (uploads fall back to local disk, rate limiting no-ops, Google sign-in is hidden).
+Every variable is documented in [`.env.example`](.env.example). You only strictly need
+`DATABASE_URL`, `AUTH_SECRET`, and `NEXTAUTH_URL` to run the app — every optional feature above
+quietly turns itself off if it's not configured, instead of crashing.
 
 ## Database
 
-PostgreSQL via Prisma. The schema (`prisma/schema.prisma`) models the marketplace end to end:
+The app uses PostgreSQL, accessed through Prisma (a toolkit that lets us describe the database in
+one file, `prisma/schema.prisma`, and get type-safe JavaScript queries automatically).
 
-| Domain | Models |
+| Group | Tables |
 |---|---|
-| Identity | `User`, `Account`, `Session`, `Address` |
+| Accounts & people | `User`, `Account`, `Session`, `Address` |
 | Catalog | `Category`, `Product` |
 | Marketplace | `Listing`, `AuthenticationRecord`, `WatchlistItem`, `Bid`, `Order`, `Review` |
-| Trend intelligence | `TrendScore`, `TrendWeightConfig` |
+| Trend engine | `TrendScore`, `TrendWeightConfig` |
 | Editorial | `BlogPost`, `Drop`, `DropProduct` |
 
-Enums (`Role`, `SellerTier`, `ListingType`, `ListingStatus`, `AuthDecision`, `OrderStatus`,
-`BidStatus`, `DisputeStatus`, `CategoryPhase`, `Condition`) drive nearly every state machine in the
-app — listing lifecycle, order status, dispute resolution, and authentication decisions are all
-enum-typed rather than free-text strings.
+The app also defines a set of fixed categories (called "enums") for things like a listing's status,
+an order's status, or a dispute's status — instead of using free-form text, each of these fields can
+only ever be one of a known set of values. This makes the state of any listing or order predictable
+and easy to check.
 
-Prisma configuration lives in `prisma.config.ts` (the modern replacement for the deprecated
-`package.json#prisma` field), which also wires up the seed command.
+The database configuration itself lives in `prisma.config.ts` — the current recommended way to
+configure Prisma, replacing the older `package.json`-based setup.
 
 ## Available Scripts
 
-| Script | Description |
+| Script | What it does |
 |---|---|
-| `npm run dev` | Start the Next.js dev server (Turbopack) |
-| `npm run build` | Production build |
-| `npm run start` | Serve a production build |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run the Vitest suite once |
-| `npm run db:seed` | Seed the database via `prisma/seed.ts` |
-| `npm run db:migrate` | Run `prisma migrate dev` |
-| `npm run db:studio` | Open Prisma Studio |
+| `npm run dev` | Starts the app locally (with Turbopack, for fast rebuilds) |
+| `npm run build` | Builds the app for production |
+| `npm run start` | Runs a production build you've already built |
+| `npm run lint` | Checks the code style with ESLint |
+| `npm test` | Runs the automated test suite once |
+| `npm run db:seed` | Fills the database with demo data |
+| `npm run db:migrate` | Applies database schema changes |
+| `npm run db:studio` | Opens Prisma Studio — a visual browser for your database |
 
-`npx tsc --noEmit` runs a standalone typecheck (also enforced in CI, separately from `next build`'s
-own type-checking pass).
+There's also `npx tsc --noEmit`, which checks that all the TypeScript types are correct without
+building anything. CI runs this separately from the build step.
 
 ## Authentication Flow
 
-- **Sign up** (`registerUser` in `src/actions/auth.ts`): Zod-validated (`src/lib/validations/auth.ts`),
-  rate-limited, bcrypt-hashed password, restricted to self-service `BUYER`/`SELLER` roles only —
-  `ADMIN`/`AUTHENTICATOR` accounts can't be created through the public form.
-- **Sign in**: Auth.js Credentials provider (rate-limited, bcrypt compare) or optional Google OAuth,
-  backed by the Prisma adapter. Sessions are JWT-based, carrying `role`, `sellerTier`, and
-  `isProMember` so most authorization checks don't need a database round trip.
-- **Edge-safe config split**: `src/lib/auth.config.ts` holds only the JWT/session callbacks (no
-  Prisma or bcrypt), so `src/proxy.ts` — which runs on the Edge runtime — can build a lightweight
-  `NextAuth` instance without pulling in Node-only dependencies. The full config
-  (`src/lib/auth.ts`, adapter + providers) is only ever imported from Server Actions/Components.
-- **Authorization boundary**: the proxy's role check is an optimistic UX redirect. The actual
-  security boundary is in every Server Action, most of which call a shared `assertAdmin()`
-  (`src/lib/auth-guards.ts`) or an inline ownership check against the requested resource's
-  `sellerId`/`buyerId` before mutating anything.
+- **Signing up** (`registerUser` in `src/actions/auth.ts`): the form is validated with Zod, rate
+  limited, and the password is hashed with bcrypt before it's stored (so the real password is never
+  saved anywhere). The public sign-up form can only create `BUYER` or `SELLER` accounts — you can't
+  create an admin or authenticator account this way.
+- **Signing in**: either email + password, or Google, if it's configured. Sessions are stored as
+  signed JWTs (a token that proves who you are without the server needing to look you up on every
+  request) and carry your role, seller tier, and Pro membership status, so most permission checks
+  don't need a database lookup at all.
+- **Why the login config is split in two**: `src/lib/auth.config.ts` holds only the lightweight
+  parts of the login setup, so `src/proxy.ts` — which runs on Next.js's fast "Edge" runtime — can
+  check who's logged in without pulling in the database library or the password-hashing library
+  (neither of which work in that lightweight runtime). The full setup, including the database
+  connection, lives in `src/lib/auth.ts` and is only ever used from the server side.
+- **Where the real security check happens**: the redirect in `src/proxy.ts` is just for a smooth
+  user experience. The actual permission check happens inside every Server Action, most of which
+  call a shared `assertAdmin()` helper (`src/lib/auth-guards.ts`) or directly check that the
+  logged-in user owns the thing they're trying to change.
 
 ## API Routes
 
-Almost all mutations go through Server Actions, not route handlers. The few route handlers that
-exist serve client-driven reads or file uploads:
+Almost everything that changes data goes through a Server Action, not a traditional API route. The
+few plain HTTP routes that do exist are for things a browser needs to call directly, like live
+search or file uploads:
 
-| Route | Method | Purpose |
+| Route | Method | What it's for |
 |---|---|---|
-| `/api/auth/[...nextauth]` | — | Auth.js session/callback handling |
-| `/api/search` | `GET` | Live product search (name/brand/subcategory, optionally scoped to a category) |
-| `/api/pricing-suggestion` | `GET` | Suggested price range for a product, from recent sold comps + trend score |
-| `/api/uploads` | `POST` | Authenticated image upload — magic-byte MIME sniffing, size/type limits, rate-limited |
+| `/api/auth/[...nextauth]` | — | Handles login sessions (managed by Auth.js) |
+| `/api/search` | `GET` | Live product search by name, brand, or subcategory |
+| `/api/pricing-suggestion` | `GET` | Suggests a price range for a product, based on recent sales and its current trend score |
+| `/api/uploads` | `POST` | Uploads an image — checks the file is really an image, checks its size, and requires the uploader to be logged in |
 
 ## Business Logic
 
-- **Trend Score:** `score = w1·mentionVelocity + w2·sentimentScore + w3·engagementGrowth`, with
-  admin-configurable weights (`/dashboard/admin/trends`) and a manual override tool.
-- **Seller tiers:** Bronze → Platinum, decreasing commission (10% → 8%) and faster payouts, with a
-  Flex Vault Pro membership stacking an additional commission discount.
-- **Pricing suggestion:** heuristic blend of recent sold comps and current trend score, shown live
-  during the seller listing flow.
-- **Authentication workflow:** every listing starts `PENDING_AUTH` → reviewed in the admin queue with
-  inspection photos → `APPROVED` (mock certificate hash + QR generated) or `REJECTED` (reason required).
-- **Insurance:** opt-in, recommended by default for items ≥ ₹10,000, cost bundled into checkout total.
-- **Checkout concurrency:** order creation runs in a single DB transaction, and each listing flips
-  `ACTIVE` → `SOLD` via a conditional update — so two buyers checking out the same listing at once
-  can't both win it.
-- **Bidding concurrency:** the top-bid check and the write happen inside one Serializable-isolation
-  transaction, so two bids racing to beat the same top bid can't both succeed.
+- **Trend score** — a formula: `score = w1·mentionVelocity + w2·sentimentScore + w3·engagementGrowth`.
+  In plain terms: how fast people are talking about it, how positive that talk is, and how fast
+  interest is growing. Admins can adjust the weights (`w1`, `w2`, `w3`) at `/dashboard/admin/trends`,
+  or override a score manually.
+- **Seller tiers** — sellers move from Bronze up to Platinum as they sell more. Higher tiers pay a
+  lower commission (10% down to 8%) and get paid out faster. A paid Flex Vault Pro membership stacks
+  an extra discount on top of whatever tier a seller is at.
+- **Price suggestions** — a blend of what similar items recently sold for, and the item's current
+  trend score, shown live while someone is listing an item for sale.
+- **Authentication workflow** — every new listing starts in a `PENDING_AUTH` state. An admin or
+  authenticator reviews the inspection photos and either approves it (which generates a fake
+  certificate hash + QR code, since this is a demo) or rejects it with a required reason.
+- **Insurance** — optional at checkout, turned on by default for items worth ₹10,000 or more, and
+  added into the checkout total.
+- **Why two buyers can't both "win" the same item** — placing an order runs inside a single database
+  transaction (a set of changes that either all happen or none do), and a listing can only flip from
+  `ACTIVE` to `SOLD` once. If two people try to buy the same listing at the same instant, the
+  database itself guarantees only one of them succeeds.
+- **Why two bids can't both "win" an auction** — checking the current top bid and placing a new one
+  happen inside one transaction at the database's strictest isolation level (called "Serializable"),
+  which is a technical way of saying: even under a race between two bidders, only one bid can
+  actually land as the new top bid.
+
+## SEO
+
+Product pages include structured data — a hidden block of JSON, following the
+[schema.org](https://schema.org) format, that tells search engines exactly what's on the page: the
+product's name, description, brand, category, and its current price or price range. This is the
+same format used by real e-commerce sites so that results can show up as rich search results (with
+price and availability visible directly in Google), rather than as a plain blue link.
 
 ## Testing
 
@@ -293,122 +335,130 @@ exist serve client-driven reads or file uploads:
 npm test
 ```
 
-Covers business logic (trend score, pricing suggestion, seller tiers), auth validation schemas, and
-the checkout/bidding server actions (commission math, insurance rules, concurrency-conflict handling).
-CI runs the full suite — typecheck, lint, test, build — on every push and pull request to `main`
+The test suite covers the business logic described above (trend score, price suggestions, seller
+tiers), the sign-up form's validation rules, and the checkout/bidding Server Actions (commission
+math, insurance rules, and what happens when two requests conflict). CI runs the full suite —
+type-checking, linting, tests, and a production build — on every push and pull request to `main`
 (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## Security
 
-- **Rate limiting:** per-IP throttling (via Upstash) on login, signup, bidding, search, pricing
-  suggestions, and uploads.
-- **Upload validation:** files are sniffed by magic bytes, not just the client-supplied MIME type,
-  before being written to storage; the on-disk filename is a random UUID with a whitelisted
-  extension, never derived from the client-supplied filename.
-- **Authorization:** every mutating server action re-checks role/ownership against the database —
-  the role-gated proxy (`src/proxy.ts`) on `/dashboard/*`, `/sell`, and `/checkout` is a UX redirect,
-  not the security boundary. Update actions build explicit, whitelisted Prisma `data` payloads
-  rather than forwarding caller-supplied objects as-is.
-- **Response headers:** `X-Content-Type-Options: nosniff`, a restrictive `Permissions-Policy`, and
-  `Referrer-Policy: strict-origin-when-cross-origin` are set on every route (`next.config.ts`); the
-  image pipeline enforces `sandbox` + `script-src 'none'` on served SVGs.
-- **Least-privilege queries:** list/table views that render in Client Components explicitly `select`
-  only the fields the UI needs, rather than serializing full database rows (e.g. never exposing
-  `passwordHash`) into the RSC payload.
+- **Rate limiting** — repeated requests from the same IP address to login, sign-up, bidding, search,
+  price suggestions, or uploads get slowed down (via Upstash), to make brute-force and spam attempts
+  harder.
+- **Upload safety** — uploaded files are checked by reading their actual bytes (not just trusting the
+  file type the browser claims), and saved under a random name rather than the name the uploader
+  gave the file. This closes off a few common ways file uploads get abused.
+- **Permission checks** — as covered above, every Server Action that changes data re-checks the
+  user's role and ownership against the database itself — the role-based redirect on
+  `/dashboard/*`, `/sell`, and `/checkout` is only there for a smooth user experience, not as the
+  actual security boundary. When an admin edits something, the server builds the exact set of fields
+  allowed to change, rather than blindly saving whatever the browser sent.
+- **Response headers** — every page sets a few extra HTTP headers that reduce common attack surface:
+  `X-Content-Type-Options: nosniff`, a restrictive `Permissions-Policy`, and
+  `Referrer-Policy: strict-origin-when-cross-origin` (all set in `next.config.ts`). Uploaded SVG
+  images are served with extra restrictions so they can't run embedded scripts.
+- **Only sending what's needed** — pages that show tables of data (like admin lists) explicitly
+  choose which database fields to send to the browser, instead of sending the whole database record.
+  This means things like a user's hashed password never leave the server, even by accident.
 
 ## Deployment
 
-The project is configured for [Vercel](https://vercel.com) (see `.vercel/`), which is the natural
-target given the framework and the optional Vercel Blob/Upstash integrations, but nothing in the
-app is Vercel-specific beyond those two optional integrations:
+This project is set up for [Vercel](https://vercel.com) (see the `.vercel/` folder), which pairs
+naturally with Next.js and with the two optional integrations (Vercel Blob and Upstash). Nothing
+else about the app is tied to Vercel specifically:
 
-1. Provision a PostgreSQL database and set `DATABASE_URL`.
-2. Set `AUTH_SECRET` and `NEXTAUTH_URL` (your production origin).
+1. Set up a PostgreSQL database and set `DATABASE_URL`.
+2. Set `AUTH_SECRET` and `NEXTAUTH_URL` (your live site's URL).
 3. Optionally connect Vercel Blob (`BLOB_READ_WRITE_TOKEN`) and Upstash Redis
-   (`UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`) for durable uploads and rate limiting —
-   without them the app still runs, just with local-disk uploads and no throttling.
-4. Run `npx prisma migrate deploy` against the production database before or during your build step.
-5. `npm run build && npm start`, or deploy via Vercel's Next.js integration.
+   (`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`) for uploads that survive redeploys and for
+   rate limiting — without them, the app still works, just with local-disk uploads and no rate
+   limiting.
+4. Run `npx prisma migrate deploy` against your production database as part of your build/deploy
+   step.
+5. Run `npm run build && npm start`, or just deploy through Vercel's Next.js integration.
 
 ## Design Decisions & Philosophy
 
-- **Server Actions as the only write path.** There's no parallel REST/GraphQL API to keep in sync
-  with the UI — every mutation is a typed function co-located with its authorization and validation
-  logic, callable directly from a form or `useTransition`.
-- **Server-side re-validation over client trust.** Every price, commission rate, and quantity used in
-  a transaction is re-read from the database inside the Server Action, never trusted from client
-  input, even when the client-side form already validated it.
-- **Config/runtime split for Auth.js.** Splitting `auth.config.ts` (Edge-safe) from `auth.ts` (full,
-  Node-only) exists specifically so the proxy's bundle stays small — a deliberate tradeoff to avoid
-  pulling Prisma Client and bcrypt into the Edge runtime.
-- **Graceful degradation for optional infrastructure.** Rate limiting and durable uploads are treated
-  as enhancements, not requirements — the app is fully functional in local dev with only a database
-  and an auth secret configured.
+- **Server Actions instead of a separate API.** There's only one codebase to keep in sync, and every
+  write to the database is a typed function that lives right next to its own validation and
+  permission checks — no separate REST or GraphQL layer to maintain alongside it.
+- **Never trust the browser for numbers that matter.** Every price, commission rate, and quantity
+  used in an order is re-read from the database inside the Server Action itself. The client-side
+  form might already have validated the same number, but the server checks it again anyway, in case
+  the request was tampered with.
+- **Splitting the login config in two.** As explained above, this keeps the fast "Edge" redirect
+  lightweight by not pulling database or password-hashing code into a runtime that can't use them.
+- **Optional infrastructure degrades gracefully.** Rate limiting and cloud file storage are treated
+  as enhancements, not requirements. The app runs completely locally with nothing more than a
+  database and a login secret configured.
 
 ## Known Limitations
 
-- This is a demo build: payments, email sending, and certificate hashes are simulated — no real
-  transactions, payment processor calls, or blockchain writes occur.
-- Product photography is generated as deterministic gradient placeholders
-  (`src/lib/mock-image.ts`) rather than real or scraped brand assets, except for a handful of
-  blog/drop cover images in `public/images/`.
-- There's no automated end-to-end (browser) test suite — Vitest covers business logic and server
-  actions, but UI flows are verified manually.
-- Local-disk uploads (`src/lib/uploads.ts`'s `LocalUploadAdapter`) don't survive a redeploy or
-  serverless cold start; it's a dev-only fallback, not suitable for production without Vercel Blob
-  configured.
+Because this is a demo/portfolio project, a few things are intentionally simulated rather than real:
+
+- Payments, sending real emails, and certificate hashes are all faked — no real money moves, no
+  real emails get sent, and no blockchain is involved.
+- Product photos are generated as gradient placeholders (`src/lib/mock-image.ts`) rather than real
+  product photography, except for a handful of blog/drop cover images in `public/images/`.
+- There's no automated browser testing (like Playwright) yet — the test suite covers the business
+  logic and Server Actions, but full user flows are checked manually.
+- Uploads saved to local disk (used automatically in development, in `src/lib/uploads.ts`) don't
+  survive a redeploy or a serverless cold start — this fallback is meant for local development only,
+  not production, unless Vercel Blob is connected.
 
 ## Future Improvements
 
-- Automated end-to-end tests for the checkout and bidding flows (e.g. Playwright).
-- Real payment integration (currently orders settle instantly into an "escrow" state).
-- Transactional email (order confirmations, outbid notifications, authentication decisions).
-- Image optimization pass on the committed `public/images/` assets.
+- Automated end-to-end browser tests for the checkout and bidding flows (e.g. with Playwright).
+- Real payment processing (orders currently settle instantly into a simulated "escrow" state).
+- Real transactional emails (order confirmations, outbid notifications, authentication decisions).
+- An image optimization pass on the images already committed to `public/images/`.
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
+| What you're seeing | Likely cause | How to fix it |
 |---|---|---|
-| `Environment variable not found: DATABASE_URL` | `.env` missing or not loaded | `cp .env.example .env` and fill in a real connection string |
-| Google sign-in button doesn't appear | `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` unset | Expected — Google OAuth is optional and hidden when unconfigured |
-| Uploads disappear after a redeploy | No Blob store connected | Connect Vercel Blob, or accept that local-disk uploads are dev-only |
-| Rate limiting seems to do nothing locally | Upstash env vars unset | Expected in dev — rate limiting is a no-op without `UPSTASH_REDIS_REST_URL`/`TOKEN` |
-| `prisma migrate dev` can't reach the database | `DATABASE_URL` points to an unreachable host | Confirm Postgres is running and the connection string/credentials are correct |
-| `npm run db:seed` run directly doesn't pick up `.env.local` | `tsx prisma/seed.ts` doesn't get Next.js's automatic env loading | Export `DATABASE_URL` in your shell first, or invoke through a tool that loads `.env.local` |
+| `Environment variable not found: DATABASE_URL` | You haven't created a `.env` file yet, or it's not being loaded | Run `cp .env.example .env` and fill in a real connection string |
+| The "Sign in with Google" button doesn't show up | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` aren't set | This is expected — Google sign-in is optional and hides itself when not configured |
+| Uploaded images disappear after a redeploy | No cloud storage (Vercel Blob) is connected | Connect Vercel Blob, or accept that local-disk uploads are for development only |
+| Rate limiting doesn't seem to do anything locally | Upstash environment variables aren't set | This is expected in development — rate limiting quietly does nothing without `UPSTASH_REDIS_REST_URL`/`TOKEN` |
+| `prisma migrate dev` can't reach the database | `DATABASE_URL` points somewhere unreachable | Make sure Postgres is actually running and the connection string/credentials are correct |
+| `npm run db:seed` doesn't pick up `.env.local` when run directly | `tsx prisma/seed.ts` doesn't automatically load env files the way Next.js does | Export `DATABASE_URL` in your shell first, or run it through a tool that loads `.env.local` for you |
 
 ## FAQ
 
 **Why Server Actions instead of a REST API?**
-The whole app is a single Next.js deployment with no external API consumers, so a separate API
-surface would just be indirection. Server Actions give typed, co-located mutation + authorization
-logic without hand-rolling request parsing.
+The whole app is one Next.js deployment with no outside apps calling into it, so a separate API
+layer would just add extra steps without adding any real benefit. Server Actions give typed,
+co-located logic — the validation and permission checks live right next to the code that saves the
+data.
 
-**Is this connected to real payment/shipping providers?**
-No — see [Known Limitations](#known-limitations). Checkout, escrow, and delivery tracking are
-simulated for demo purposes.
+**Is this connected to real payments or real shipping?**
+No — see [Known Limitations](#known-limitations) above. Checkout, escrow, and delivery tracking are
+all simulated for demo purposes.
 
 **Can I run it without Vercel Blob or Upstash?**
-Yes. Both are optional; the app falls back to local-disk uploads and no-op rate limiting
-respectively. See [Environment Variables](#environment-variables).
+Yes, both are entirely optional. The app falls back to saving uploads locally and skips rate
+limiting if they're not configured. See [Environment Variables](#environment-variables).
 
 ## Contributing
 
-This started as a personal/portfolio project rather than a community one, so there's no formal
-contribution process yet. If you'd like to contribute:
+This started as a personal/portfolio project, so there's no formal contribution process yet. If
+you'd still like to contribute:
 
-1. Fork the repository and create a feature branch.
-2. Run `npm run lint`, `npx tsc --noEmit`, and `npm test` before opening a PR — CI runs all three
-   plus a production build.
-3. Keep Server Actions consistent with the existing pattern: validate input, re-check
-   authorization/ownership against the database, and build explicit (whitelisted) Prisma `data`
-   payloads rather than forwarding caller-supplied objects as-is.
-4. Open a pull request describing what changed and why.
+1. Fork the repository and create a new branch for your change.
+2. Before opening a pull request, run `npm run lint`, `npx tsc --noEmit`, and `npm test` — CI runs
+   all three, plus a production build, on every pull request.
+3. Follow the existing pattern in Server Actions: validate the input, re-check the user's
+   permission/ownership against the database, and explicitly list which fields are allowed to
+   change (rather than saving whatever the browser sent as-is).
+4. Open a pull request explaining what changed and why.
 
 ## License
 
-No license file is currently included in this repository, so default copyright law applies — all
-rights are reserved by the author. If you're the maintainer and intend to open-source this project,
-add a `LICENSE` file (e.g. MIT) and update this section accordingly.
+There's no license file in this repository yet, so by default all rights are reserved by the
+author. If you're the maintainer and want to open-source this project, add a `LICENSE` file (for
+example, the MIT license) and update this section.
 
 ## Acknowledgements
 
