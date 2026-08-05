@@ -16,6 +16,57 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+const SITE_URL = "https://flex-vault.vercel.app";
+
+const CONDITION_SCHEMA: Record<string, string> = {
+  NEW: "https://schema.org/NewCondition",
+  LIKE_NEW: "https://schema.org/UsedCondition",
+  USED_EXCELLENT: "https://schema.org/UsedCondition",
+  USED_GOOD: "https://schema.org/UsedCondition",
+  USED_FAIR: "https://schema.org/UsedCondition",
+};
+
+function buildProductJsonLd(product: NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>) {
+  const url = `${SITE_URL}/product/${product.slug}`;
+  const images = product.images.filter((src) => src.startsWith("http"));
+  const prices = product.listings.map((l) => l.price);
+
+  const offers =
+    product.listings.length === 0
+      ? { "@type": "Offer", priceCurrency: "INR", availability: "https://schema.org/OutOfStock", url }
+      : product.listings.length === 1
+        ? {
+            "@type": "Offer",
+            price: product.listings[0].price,
+            priceCurrency: "INR",
+            availability: "https://schema.org/InStock",
+            itemCondition: CONDITION_SCHEMA[product.listings[0].condition],
+            url,
+          }
+        : {
+            "@type": "AggregateOffer",
+            lowPrice: Math.min(...prices),
+            highPrice: Math.max(...prices),
+            offerCount: product.listings.length,
+            priceCurrency: "INR",
+            availability: "https://schema.org/InStock",
+            url,
+          };
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    sku: product.sku,
+    brand: { "@type": "Brand", name: product.brand },
+    category: product.category.name,
+    url,
+    ...(images.length > 0 && { image: images }),
+    offers,
+  };
+}
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -57,8 +108,14 @@ export default async function ProductPage({ params }: Props) {
       )
     : false;
 
+  const jsonLd = buildProductJsonLd(product);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <div className="grid gap-10 lg:grid-cols-2">
         <ImageGallery images={product.images} alt={product.name} />
 
