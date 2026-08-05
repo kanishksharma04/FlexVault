@@ -7,6 +7,7 @@ import { UserMenu, AuthButtons } from "./user-menu";
 import { MobileNav } from "./mobile-nav";
 import { CartButton } from "@/components/cart/cart-button";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export async function SiteHeader() {
   const session = await auth();
@@ -52,6 +53,7 @@ export async function SiteHeader() {
             </Link>
           </Button>
           <CartButton />
+          <ThemeToggle />
           {session?.user ? <UserMenu user={session.user} /> : <AuthButtons />}
         </div>
       </div>

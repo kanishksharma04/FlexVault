@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const TIER_CONFIG = {
   BRONZE: { icon: Medal, className: "border-transparent bg-[#8a5a3a]/20 text-[#c98a5c]" },
-  SILVER: { icon: Award, className: "border-transparent bg-white/10 text-zinc-200" },
+  SILVER: { icon: Award, className: "border-transparent bg-foreground/10 text-foreground" },
   GOLD: { icon: Gem, className: "border-transparent bg-gold/15 text-gold" },
   PLATINUM: { icon: Crown, className: "border-transparent bg-acid/15 text-acid" },
 } as const;

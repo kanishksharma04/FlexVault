@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Anton, Archivo, Space_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -55,15 +56,27 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`dark ${fontDisplay.variable} ${fontBody.variable} ${fontData.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function () {
+            try {
+              var stored = localStorage.getItem("flexvault-theme");
+              var theme = stored === "light" ? "light" : "dark";
+              var root = document.documentElement;
+              root.classList.toggle("dark", theme === "dark");
+              root.style.colorScheme = theme;
+            } catch (e) {}
+          })();`}
+        </Script>
         <Providers>
           <HypeTicker />
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
-          <Toaster theme="dark" position="bottom-right" />
+          <Toaster position="bottom-right" />
         </Providers>
       </body>
     </html>

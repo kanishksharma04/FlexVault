@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CATEGORY_NAV, PRIMARY_NAV } from "@/lib/nav";
 
 export function MobileNav() {
@@ -48,6 +49,12 @@ export function MobileNav() {
               {n.label}
             </Link>
           ))}
+          <div className="mt-4 flex items-center justify-between rounded px-2 py-2">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              Appearance
+            </p>
+            <ThemeToggle />
+          </div>
         </nav>
       </SheetContent>
     </Sheet>
