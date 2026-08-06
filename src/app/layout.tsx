@@ -71,10 +71,18 @@ export default function RootLayout({
             } catch (e) {}
           })();`}
         </Script>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded focus:border focus:border-acid focus:bg-vault focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-acid"
+        >
+          Skip to content
+        </a>
         <Providers>
           <HypeTicker />
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+            {children}
+          </main>
           <SiteFooter />
           <Toaster position="bottom-right" />
         </Providers>
